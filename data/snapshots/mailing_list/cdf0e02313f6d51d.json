@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "data": [
+    {
+      "subject": "CommitFailedException on long-running consumer poll loop",
+      "date": "2024-09-10",
+      "author": "dev@kafka.apache.org",
+      "snippet": "Troubleshooting thread explaining why slow record processing exceeding max.poll.interval.ms leads to coordinator offset commit rejection.",
+      "url": "https://lists.apache.org/thread/offset-commit-timeout-help"
+    }
+  ]
+}

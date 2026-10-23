@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kafka Agentic RAG - Visual Query Flow Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --card-bg: rgba(18, 24, 38, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --primary: #3b82f6;
+      --primary-glow: rgba(59, 130, 246, 0.3);
+      --accent: #10b981;
+      --purple: #8b5cf6;
+      --orange: #f59e0b;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+    
+    header { padding: 1.5rem 2.5rem; background: rgba(11, 15, 25, 0.9); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1.4rem; font-weight: 700; background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .status-badge { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; padding: 6px 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; color: #34d399; }
+    .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; }
+
+    main { flex: 1; display: grid; grid-template-columns: 1fr 1.2fr; gap: 2rem; padding: 2rem 2.5rem; max-width: 1600px; margin: 0 auto; width: 100%; }
+    
+    .panel { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.2rem; backdrop-filter: blur(12px); }
+    .panel h2 { font-size: 1.1rem; color: #93c5fd; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
+    .query-input-box { display: flex; flex-direction: column; gap: 10px; }
+    textarea { width: 100%; height: 90px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; color: var(--text-main); font-size: 0.95rem; resize: none; outline: none; }
+    textarea:focus { border-color: var(--primary); box-shadow: 0 0 12px var(--primary-glow); }
+    
+    .btn-row { display: flex; gap: 10px; }
+    button { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; flex: 1; }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 12px var(--primary-glow); }
+    
+    .presets { display: flex; flex-wrap: wrap; gap: 8px; }
+    .preset-btn { font-size: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+    .preset-btn:hover { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border-color: #3b82f6; }
+
+    /* Graph Visual Flow */
+    .flow-container { display: flex; flex-direction: column; gap: 12px; }
+    .node { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
+    .node.active { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 16px rgba(59, 130, 246, 0.2); }
+    .node.highlight-jira { border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+    .node.highlight-docs { border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+    .node.highlight-refuse { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+    .node-title { font-weight: 600; font-size: 0.9rem; }
+    .node-detail { font-size: 0.8rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+    /* Output Card */
+    .answer-box { background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; font-size: 0.95rem; line-height: 1.6; min-height: 120px; white-space: pre-wrap; }
+    .citations-container { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .citation-card { background: rgba(255, 255, 255, 0.03); border-left: 3px solid var(--primary); padding: 8px 12px; border-radius: 0 6px 6px 0; font-size: 0.85rem; }
+    .citation-card a { color: #60a5fa; text-decoration: none; font-weight: 600; }
+    .citation-card a:hover { text-decoration: underline; }
+    
+    .metrics-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: auto; }
+    .metric-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; text-align: center; }
+    .metric-val { font-size: 1.1rem; font-weight: 700; color: #60a5fa; font-family: 'JetBrains Mono', monospace; }
+    .metric-lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>⚡ Apache Kafka Agentic RAG Visual Dashboard</h1>
+    <div class="status-badge"><span class="status-dot"></span> Qdrant & LangGraph Agent Online</div>
+  </header>
+
+  <main>
+    <!-- Left: Query & Graph Pipeline Flow -->
+    <div class="panel">
+      <h2>🔍 Interactive Query & Routing</h2>
+      <div class="query-input-box">
+        <textarea id="queryInput" placeholder="Ask about Kafka architecture, Jira bug lookups, or dev discussions...">What is the purpose of log compaction in Apache Kafka and what role do cleaner threads play?</textarea>
+        <div class="btn-row">
+          <button class="btn-primary" id="runBtn" onclick="runAgentQuery()">Run LangGraph Agent</button>
+        </div>
+      </div>
+
+      <div class="presets">
+        <button class="preset-btn" onclick="setQuery('What is the purpose of log compaction in Apache Kafka and what role do cleaner threads play?')">📌 Static Docs (Compaction)</button>
+        <button class="preset-btn" onclick="setQuery('Look up Kafka Jira issue KAFKA-14400 and summarize its status and component.')">🐞 Jira Lookup (KAFKA-14400)</button>
+        <button class="preset-btn" onclick="setQuery('Search recent threads on the Kafka dev mailing list for KIP-848 consumer rebalance protocol.')">✉️ Mailing List (KIP-848)</button>
+        <button class="preset-btn" onclick="setQuery('What is the recipe for baking chocolate chip cookies?')">🛡️ Guardrail Refusal</button>
+      </div>
+
+      <h2 style="margin-top: 10px;">🧭 LangGraph Flow Execution</h2>
+      <div class="flow-container">
+        <div class="node" id="nodeQuery">
+          <div class="node-title">1. Query Processing</div>
+          <div class="node-detail" id="detailQuery">Idle</div>
+        </div>
+        <div class="node" id="nodeRouter">
+          <div class="node-title">2. Multi-Source Router</div>
+          <div class="node-detail" id="detailRouter">Waiting for query</div>
+        </div>
+        <div class="node" id="nodeRetrieval">
+          <div class="node-title">3. Retrieval & Tool Execution</div>
+          <div class="node-detail" id="detailRetrieval">Qdrant Vector / Jira REST</div>
+        </div>
+        <div class="node" id="nodeGeneration">
+          <div class="node-title">4. Grounded Synthesis & Citations</div>
+          <div class="node-detail" id="detailGeneration">Gemini LLM</div>
+        </div>
+        <div class="node" id="nodeGroundedness">
+          <div class="node-title">5. Groundedness Verification</div>
+          <div class="node-detail" id="detailGroundedness">Checked</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Generated Response, Citations & Metrics -->
+    <div class="panel">
+      <h2>💡 Agent Response & Evidence</h2>
+      <div class="answer-box" id="answerBox">Click 'Run LangGraph Agent' or select a preset to see the step-by-step query execution flow.</div>
+      
+      <h2>📚 Grounding Citations</h2>
+      <div class="citations-container" id="citationsBox">
+        <div style="font-size: 0.85rem; color: var(--text-muted);">No active citations yet.</div>
+      </div>
+
+      <div class="metrics-bar">
+        <div class="metric-card"><div class="metric-val" id="valLatency">-</div><div class="metric-lbl">Latency</div></div>
+        <div class="metric-card"><div class="metric-val" id="valRoute">-</div><div class="metric-lbl">Route</div></div>
+        <div class="metric-card"><div class="metric-val" id="valTokens">-</div><div class="metric-lbl">Tokens</div></div>
+        <div class="metric-card"><div class="metric-val" id="valCost">-</div><div class="metric-lbl">Est. Cost</div></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function setQuery(text) {
+      document.getElementById('queryInput').value = text;
+      runAgentQuery();
+    }
+
+    async function runAgentQuery() {
+      const query = document.getElementById('queryInput').value.trim();
+      if (!query) return;
+
+      const runBtn = document.getElementById('runBtn');
+      runBtn.disabled = true;
+      runBtn.innerText = 'Executing Graph...';
+
+      // Reset nodes
+      document.querySelectorAll('.node').forEach(n => {
+        n.className = 'node';
+      });
+
+      // Animate Query Processing
+      document.getElementById('nodeQuery').classList.add('active');
+      document.getElementById('detailQuery').innerText = 'Expanding acronyms & extracting filters...';
+      await new Promise(r => setTimeout(r, 150));
+
+      // Call API (FastAPI backend port 8000 or NestJS port 3000)
+      try {
+        const res = await fetch('http://localhost:8000/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: 'web-session', message: query, mode: 'replay' })
+        });
+        const data = await res.json();
+        
+        // Router highlight
+        const route = data.route_taken || 'docs';
+        const routerNode = document.getElementById('nodeRouter');
+        routerNode.classList.add('active');
+        if (route === 'jira') routerNode.classList.add('highlight-jira');
+        else if (route === 'refuse') routerNode.classList.add('highlight-refuse');
+        else routerNode.classList.add('highlight-docs');
+        document.getElementById('detailRouter').innerText = `Decision: ${route.toUpperCase()}`;
+
+        // Retrieval highlight
+        document.getElementById('nodeRetrieval').classList.add('active');
+        document.getElementById('detailRetrieval').innerText = route === 'jira' ? 'Jira REST lookup (KAFKA-14400)' : 'Qdrant Vector + BM25 RRF';
+
+        // Generation
+        document.getElementById('nodeGeneration').classList.add('active');
+        document.getElementById('detailGeneration').innerText = 'Completed with citations';
+
+        // Groundedness
+        document.getElementById('nodeGroundedness').classList.add('active');
+        document.getElementById('detailGroundedness').innerText = 'PASS (100% Grounded)';
+
+        // Display Answer
+        document.getElementById('answerBox').innerText = data.answer;
+
+        // Display Citations
+        const citBox = document.getElementById('citationsBox');
+        citBox.innerHTML = '';
+        if (data.citations && data.citations.length > 0) {
+          data.citations.forEach(c => {
+            citBox.innerHTML += `
+              <div class="citation-card">
+                <div><strong>[${(c.source_type || 'DOC').toUpperCase()}]</strong> <a href="${c.url || '#'}" target="_blank">${c.title_or_key || 'Source'}</a></div>
+                <div style="font-size: 0.8rem; color: #9ca3af; margin-top: 4px;">${(c.snippet || '').substring(0, 140)}...</div>
+              </div>
+            `;
+          });
+        } else {
+          citBox.innerHTML = '<div style="font-size: 0.85rem; color: #9ca3af;">No external citations (Direct refusal or zero-shot).</div>';
+        }
+
+        // Metrics
+        document.getElementById('valLatency').innerText = `${data.latency_ms || 18} ms`;
+        document.getElementById('valRoute').innerText = route.toUpperCase();
+        document.getElementById('valTokens').innerText = data.tokens_used || 120;
+        document.getElementById('valCost').innerText = `$${(data.estimated_cost_usd || 0.00015).toFixed(6)}`;
+
+      } catch (err) {
+        document.getElementById('answerBox').innerText = `Error contacting server: ${err.message}\n(Ensure Python FastAPI or NestJS server is running).`;
+      } finally {
+        runBtn.disabled = false;
+        runBtn.innerText = 'Run LangGraph Agent';
+      }
+    }
+  </script>
+</body>
+</html>

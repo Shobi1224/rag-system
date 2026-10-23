@@ -1,0 +1,500 @@
+{
+  "kafka_target_version": "4.0",
+  "generated_at": "2026-10-04T05:45:56.529970Z",
+  "total_documents": 31,
+  "total_size_bytes": 59197,
+  "total_size_kb": 57.81,
+  "total_tokens": 9171,
+  "total_headings": {
+    "h1": 0,
+    "h2": 51,
+    "h3": 60,
+    "total": 111
+  },
+  "category_summary": {
+    "core_docs": {
+      "documents": 5,
+      "tokens": 4312
+    },
+    "config_reference": {
+      "documents": 3,
+      "tokens": 2420
+    },
+    "kip": {
+      "documents": 20,
+      "tokens": 1925
+    },
+    "release_notes": {
+      "documents": 3,
+      "tokens": 514
+    }
+  },
+  "failed_fetches": [],
+  "documents": [
+    {
+      "doc_id": "doc-arch-storage",
+      "filename": "doc-arch-storage.md",
+      "category": "core_docs",
+      "path": "data\\corpus\\docs\\doc-arch-storage.md",
+      "size_bytes": 4451,
+      "token_count": 947,
+      "headings": {
+        "h1": 0,
+        "h2": 4,
+        "h3": 1
+      },
+      "content_sha256": "907be6ce803689c9b45eeb52c17f2e6738771c7bb9c5d2410f2dce03af842645",
+      "source_url": "https://kafka.apache.org/documentation/#design"
+    },
+    {
+      "doc_id": "doc-log-compaction",
+      "filename": "doc-log-compaction.md",
+      "category": "core_docs",
+      "path": "data\\corpus\\docs\\doc-log-compaction.md",
+      "size_bytes": 4115,
+      "token_count": 814,
+      "headings": {
+        "h1": 0,
+        "h2": 5,
+        "h3": 0
+      },
+      "content_sha256": "a1bdd70b871902509f24aa35fa06b71def629ac7b1c58bec80cfcb0bcd2b56c1",
+      "source_url": "https://kafka.apache.org/documentation/#compaction"
+    },
+    {
+      "doc_id": "doc-kraft-consensus",
+      "filename": "doc-kraft-consensus.md",
+      "category": "core_docs",
+      "path": "data\\corpus\\docs\\doc-kraft-consensus.md",
+      "size_bytes": 4441,
+      "token_count": 862,
+      "headings": {
+        "h1": 0,
+        "h2": 5,
+        "h3": 2
+      },
+      "content_sha256": "e3161d761e514cb7fdc6e91ff6b6a6bf87bca8b92d5d82ca2757eb7c29a3362a",
+      "source_url": "https://kafka.apache.org/documentation/#kraft"
+    },
+    {
+      "doc_id": "doc-transactions-eos",
+      "filename": "doc-transactions-eos.md",
+      "category": "core_docs",
+      "path": "data\\corpus\\docs\\doc-transactions-eos.md",
+      "size_bytes": 4997,
+      "token_count": 964,
+      "headings": {
+        "h1": 0,
+        "h2": 5,
+        "h3": 0
+      },
+      "content_sha256": "ad6cedf455de9e64f48456658a8baa31fffbeba3d6a21866499b3a8501e70ed2",
+      "source_url": "https://kafka.apache.org/documentation/#semantics"
+    },
+    {
+      "doc_id": "doc-consumer-rebalance",
+      "filename": "doc-consumer-rebalance.md",
+      "category": "core_docs",
+      "path": "data\\corpus\\docs\\doc-consumer-rebalance.md",
+      "size_bytes": 4113,
+      "token_count": 725,
+      "headings": {
+        "h1": 0,
+        "h2": 4,
+        "h3": 1
+      },
+      "content_sha256": "4055aaa4fa05e38fef9897bb15d84722e7a1b73d572b4b9cd3250be4d0a08203",
+      "source_url": "https://kafka.apache.org/documentation/#consumer_rebalance"
+    },
+    {
+      "doc_id": "config-producer",
+      "filename": "config-producer.md",
+      "category": "config_reference",
+      "path": "data\\corpus\\configs\\config-producer.md",
+      "size_bytes": 3961,
+      "token_count": 825,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 8
+      },
+      "content_sha256": "e0d36e1b6928035318bea3042938fd28342c6f65874cf3209896bd04643cf5d7",
+      "source_url": "https://kafka.apache.org/documentation/#producerconfigs"
+    },
+    {
+      "doc_id": "config-consumer",
+      "filename": "config-consumer.md",
+      "category": "config_reference",
+      "path": "data\\corpus\\configs\\config-consumer.md",
+      "size_bytes": 4164,
+      "token_count": 879,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 9
+      },
+      "content_sha256": "c244330ec7a407097572f91af592b7215cd0a2d2e1c47ca58901e4749af9e392",
+      "source_url": "https://kafka.apache.org/documentation/#consumerconfigs"
+    },
+    {
+      "doc_id": "config-broker",
+      "filename": "config-broker.md",
+      "category": "config_reference",
+      "path": "data\\corpus\\configs\\config-broker.md",
+      "size_bytes": 3326,
+      "token_count": 716,
+      "headings": {
+        "h1": 0,
+        "h2": 3,
+        "h3": 4
+      },
+      "content_sha256": "3eaff0bd162c704bdd35db7386ace28d586e551d1cf8efcb975a43535d73dd32",
+      "source_url": "https://kafka.apache.org/documentation/#brokerconfigs"
+    },
+    {
+      "doc_id": "kip-500",
+      "filename": "kip-500.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-500.md",
+      "size_bytes": 2408,
+      "token_count": 341,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 2
+      },
+      "content_sha256": "9615175f6be2ee7cf89fb82f66fe280631e1143eb6919833823409017f8d6b14",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-500%3A+Replace+ZooKeeper+with+a+Self-Managed+Metadata+Quorum"
+    },
+    {
+      "doc_id": "kip-848",
+      "filename": "kip-848.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-848.md",
+      "size_bytes": 2255,
+      "token_count": 295,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 2
+      },
+      "content_sha256": "f761149db36342216e932caa7a863c14cbd9b723b65a8e97fe4879caeb0d2524",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-848%3A+The+Next+Generation+Consumer+Rebalance+Protocol"
+    },
+    {
+      "doc_id": "kip-932",
+      "filename": "kip-932.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-932.md",
+      "size_bytes": 2008,
+      "token_count": 279,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 2
+      },
+      "content_sha256": "b63e21257fd5818e56ada7992a5121fffb3ecb89beba46dedf8f5c54f6d9a4c9",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-932%3A+Queues+for+Kafka"
+    },
+    {
+      "doc_id": "kip-405",
+      "filename": "kip-405.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-405.md",
+      "size_bytes": 1705,
+      "token_count": 212,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 2
+      },
+      "content_sha256": "4a84d7768979355e167beb64a18d03096e60c4765498d81883046629e36c61b5",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-405%3A+Kafka+Tiered+Storage"
+    },
+    {
+      "doc_id": "kip-833",
+      "filename": "kip-833.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-833.md",
+      "size_bytes": 878,
+      "token_count": 66,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "511386efd0d658bc620a3635b07f07470bec45f5769b1a7da7e8f3c259012da5",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-833%3A+Mark+KRaft+as+Production+Ready"
+    },
+    {
+      "doc_id": "kip-98",
+      "filename": "kip-98.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-98.md",
+      "size_bytes": 993,
+      "token_count": 68,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "f4eb98b8118a53c43f9fc60319673f8a9376483101926ed846c0b7c5b0adf05f",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-98+-+Exactly+Once+Delivery+and+Transactional+Messaging"
+    },
+    {
+      "doc_id": "kip-793",
+      "filename": "kip-793.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-793.md",
+      "size_bytes": 782,
+      "token_count": 50,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "462aadb5bdb0f9bb57a91fdea3e023d2974336c792368b0d30575468da88245a",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-793%3A+Add+list+consumer+groups+API"
+    },
+    {
+      "doc_id": "kip-900",
+      "filename": "kip-900.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-900.md",
+      "size_bytes": 758,
+      "token_count": 39,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "4f276cae793db9141dda317e3b4daaee87b8fe7ddae7f3d78129de3af574a4da",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-900%3A+Client+side+metrics"
+    },
+    {
+      "doc_id": "kip-892",
+      "filename": "kip-892.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-892.md",
+      "size_bytes": 862,
+      "token_count": 51,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "4c8b5abda2d829eda5f40436a75170f1f15fa2d9d1ea01b5afb837dab39e2e5a",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-892%3A+Transactional+server-side+verification"
+    },
+    {
+      "doc_id": "kip-584",
+      "filename": "kip-584.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-584.md",
+      "size_bytes": 865,
+      "token_count": 48,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "bfa2278841019105d03ea89b8fc5343e8ae5bac62497bf10c2fb362d5b5326f4",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-584%3A+Versioning+scheme+for+features"
+    },
+    {
+      "doc_id": "kip-679",
+      "filename": "kip-679.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-679.md",
+      "size_bytes": 835,
+      "token_count": 43,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "a8d5984d4c30887e7f71c55ac1307cc29e730dff451aae17110f9c495ec5624d",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-679%3A+Producer+ID+generation"
+    },
+    {
+      "doc_id": "kip-915",
+      "filename": "kip-915.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-915.md",
+      "size_bytes": 814,
+      "token_count": 43,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "56333702f1e00b01e204900856b6c89ad8036f46fc5220e93523bbd324997e20",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-915%3A+TxnOffsetCommit+with+auto-committed+offsets"
+    },
+    {
+      "doc_id": "kip-960",
+      "filename": "kip-960.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-960.md",
+      "size_bytes": 827,
+      "token_count": 39,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "1451d5bfe12b29b3bed23f28870ff3e17263894c026146baa11a3faa9410d96f",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-960%3A+Cooperative+rebalancing+improvements"
+    },
+    {
+      "doc_id": "kip-382",
+      "filename": "kip-382.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-382.md",
+      "size_bytes": 901,
+      "token_count": 51,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "8b4fca331dfedcf8cec6bb34aa0f123cd31e1d30a9b16e44f93688d6a1c5ef9f",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-382%3A+MirrorMaker+2.0"
+    },
+    {
+      "doc_id": "kip-516",
+      "filename": "kip-516.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-516.md",
+      "size_bytes": 770,
+      "token_count": 48,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "9cff97dcefb554f523dff508b79fd2e02465eea47e7128885d5a37bcc2282ae8",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-516%3A+Topic+IDs"
+    },
+    {
+      "doc_id": "kip-704",
+      "filename": "kip-704.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-704.md",
+      "size_bytes": 823,
+      "token_count": 42,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "e8ce53671fc2491819808a9bb60361717bfda643915dc76c8b5352dca5469421",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-704%3A+Send+cluster+ID+in+Fetch+and+Produce+requests"
+    },
+    {
+      "doc_id": "kip-996",
+      "filename": "kip-996.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-996.md",
+      "size_bytes": 852,
+      "token_count": 64,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "bfbf7bfcbd477fc5ba49994043ccb80783a6895f9f36af4dfb52013c00262c41",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-996%3A+Pre-Vote+in+KRaft"
+    },
+    {
+      "doc_id": "kip-1018",
+      "filename": "kip-1018.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-1018.md",
+      "size_bytes": 772,
+      "token_count": 46,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "b481426e8f01c172e490f26de6aba1111225a5417dbeff18912be8542b71e716",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-1018%3A+Ephemeral+topics"
+    },
+    {
+      "doc_id": "kip-182",
+      "filename": "kip-182.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-182.md",
+      "size_bytes": 831,
+      "token_count": 55,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "5fa21de5807244058020fecd8c9d077ccbfabeefbe739ff7a391689e37f395a4",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-182%3A+Provide+join+and+aggregate+operations+for+Kafka+Streams"
+    },
+    {
+      "doc_id": "kip-447",
+      "filename": "kip-447.md",
+      "category": "kip",
+      "path": "data\\corpus\\kips\\kip-447.md",
+      "size_bytes": 887,
+      "token_count": 45,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 1
+      },
+      "content_sha256": "a557d3f7ad3444afc162a6cac6e27a3f9ba88474da258430e0a0854eff30b317",
+      "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-447%3A+Producer+scalability+for+exactly-once+semantics"
+    },
+    {
+      "doc_id": "rel-4-0-0",
+      "filename": "rel-4-0-0.md",
+      "category": "release_notes",
+      "path": "data\\corpus\\release_notes\\rel-4-0-0.md",
+      "size_bytes": 1820,
+      "token_count": 273,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 5
+      },
+      "content_sha256": "5b33ff1e62bc8f3f96d3dfd78cb188e52da745df53c5930c213259705f427de6",
+      "source_url": "https://kafka.apache.org/40/documentation/#relnotes"
+    },
+    {
+      "doc_id": "rel-3-9-0",
+      "filename": "rel-3-9-0.md",
+      "category": "release_notes",
+      "path": "data\\corpus\\release_notes\\rel-3-9-0.md",
+      "size_bytes": 1050,
+      "token_count": 143,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 3
+      },
+      "content_sha256": "8a5c312ef2581647714692aca7e06086016c7a60e5840ca25d21acb9f92f387f",
+      "source_url": "https://kafka.apache.org/39/documentation/#relnotes"
+    },
+    {
+      "doc_id": "rel-3-8-0",
+      "filename": "rel-3-8-0.md",
+      "category": "release_notes",
+      "path": "data\\corpus\\release_notes\\rel-3-8-0.md",
+      "size_bytes": 933,
+      "token_count": 98,
+      "headings": {
+        "h1": 0,
+        "h2": 1,
+        "h3": 3
+      },
+      "content_sha256": "05d381bf827ab9df2ab278026da9548278cc4f7c4e7e155a774a182a1f1f07aa",
+      "source_url": "https://kafka.apache.org/38/documentation/#relnotes"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "data": {
+    "key": "KAFKA-13000",
+    "title": "Support topic IDs in delete topics and metadata requests",
+    "status": "Resolved",
+    "component": "Core",
+    "updated": "2024-09-01T12:00:00Z",
+    "snippet": "Implements KIP-516 128-bit UUID topic identifiers across broker metadata requests to prevent topic deletion race conditions.",
+    "url": "https://issues.apache.org/jira/browse/KAFKA-13000"
+  }
+}

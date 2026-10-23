@@ -1,0 +1,322 @@
+[
+  {
+    "id": "q01",
+    "question": "What is the purpose of log compaction in Apache Kafka and what role do cleaner threads play?",
+    "type": "static",
+    "expected_answer": "Log compaction ensures Kafka retains at least the latest known value for each message key within a topic partition log instead of discarding records strictly by time or size. Cleaner threads (log.cleaner.threads) build an in-memory offset map (SkimpyOffsetMap) of the dirty tail and rewrite the log, keeping only the latest offset for each key and discarding older duplicate records.",
+    "source_section": "doc-log-compaction",
+    "needs_live": false
+  },
+  {
+    "id": "q02",
+    "question": "What is the difference between producer acknowledgments acks=0, acks=1, and acks=all?",
+    "type": "static",
+    "expected_answer": "acks=0 means the producer does not wait for any broker acknowledgment (highest throughput, risk of message loss). acks=1 means the producer waits for acknowledgment from the partition leader broker only. acks=all (or -1) means the producer waits for acknowledgment from the leader and all currently in-sync replicas (min.insync.replicas), guaranteeing zero data loss if min.insync.replicas are alive.",
+    "source_section": "config-producer",
+    "needs_live": false
+  },
+  {
+    "id": "q03",
+    "question": "How does KRaft eliminate the need for Apache ZooKeeper in Kafka 4.0?",
+    "type": "static",
+    "expected_answer": "KRaft replaces ZooKeeper by managing cluster metadata directly inside Kafka controller nodes using Raft consensus. Metadata mutations are appended to an internal @metadata topic log and replicated to standby controllers. Brokers tail this log to maintain an in-memory metadata cache, eliminating ZooKeeper sync bottlenecks and enabling sub-second failovers.",
+    "source_section": "doc-kraft-consensus",
+    "needs_live": false
+  },
+  {
+    "id": "q04",
+    "question": "What is the role of the Transaction Coordinator and the __transaction_state topic in Exactly-Once Semantics?",
+    "type": "static",
+    "expected_answer": "The Transaction Coordinator is a broker component assigned by hashing the producer's transactional.id to a partition of the __transaction_state topic. It manages the two-phase commit protocol lifecycle (Empty -> Ongoing -> PrepareCommit -> CompleteCommit) and coordinates writing COMMIT/ABORT control markers to topic partition logs.",
+    "source_section": "doc-transactions-eos",
+    "needs_live": false
+  },
+  {
+    "id": "q05",
+    "question": "What is the difference between eager rebalancing and the CooperativeStickyAssignor in consumer groups?",
+    "type": "static",
+    "expected_answer": "Eager rebalancing is a stop-the-world process where all consumers in a group revoke all assigned partitions before receiving new assignments, pausing all message consumption. CooperativeStickyAssignor migrates partitions incrementally over two rounds, allowing consumers with untouched partitions to continue processing data without downtime.",
+    "source_section": "doc-consumer-rebalance",
+    "needs_live": false
+  },
+  {
+    "id": "q06",
+    "question": "What does min.insync.replicas do and what happens when available in-sync replicas drop below this threshold during a produce request with acks=all?",
+    "type": "static",
+    "expected_answer": "min.insync.replicas specifies the minimum number of in-sync replicas (ISR) that must acknowledge a produce request when acks=all. If the number of online in-sync replicas drops below min.insync.replicas, the broker rejects producer writes with a NotEnoughReplicasException (or NotEnoughReplicasAfterAppendException) to prevent uncommitted data loss.",
+    "source_section": "config-broker",
+    "needs_live": false
+  },
+  {
+    "id": "q07",
+    "question": "What binary information is stored in the RecordBatch header in Kafka record format v2?",
+    "type": "static",
+    "expected_answer": "RecordBatch v2 contains baseOffset, batchLength, partitionLeaderEpoch, magic byte (2), CRC32-C checksum, attributes bitflags (compression, timestamp type, transactional flag, control batch flag), lastOffsetDelta, baseTimestamp, maxTimestamp, producerId (PID), producerEpoch, baseSequence, and an array of individual records.",
+    "source_section": "doc-arch-storage",
+    "needs_live": false
+  },
+  {
+    "id": "q08",
+    "question": "How does isolation.level=read_committed change how consumers read messages from a topic?",
+    "type": "static",
+    "expected_answer": "isolation.level=read_committed filters out messages from aborted transactions and only delivers committed transactional records and non-transactional messages. The consumer reads only up to the Last Stable Offset (LSO) and blocks if an ongoing transaction has not yet committed or aborted.",
+    "source_section": "config-consumer",
+    "needs_live": false
+  },
+  {
+    "id": "q09",
+    "question": "What are the .log, .index, and .timeindex files inside a partition directory?",
+    "type": "static",
+    "expected_answer": "The .log file contains the raw serialized RecordBatch message payloads. The .index file is a memory-mapped sparse index mapping logical offsets to physical byte positions in the .log file for binary search. The .timeindex file maps message timestamps to logical offsets for time-based retention and lookup queries.",
+    "source_section": "doc-arch-storage",
+    "needs_live": false
+  },
+  {
+    "id": "q10",
+    "question": "What does KIP-500 specify regarding metadata management?",
+    "type": "static",
+    "expected_answer": "KIP-500 defines the replacement of external ZooKeeper metadata storage with an internal self-managed Raft metadata quorum (KRaft), storing cluster state as an event-driven replicated log on the @metadata topic.",
+    "source_section": "kip-500",
+    "needs_live": false
+  },
+  {
+    "id": "q11",
+    "question": "What major change did KIP-848 introduce to the consumer group protocol?",
+    "type": "static",
+    "expected_answer": "KIP-848 introduced the Next-Generation Consumer Rebalance Protocol, moving partition assignment from client-side assignors to the server-side Group Coordinator and replacing stop-the-world JoinGroup barriers with lightweight incremental heartbeat RPCs (group.protocol=consumer).",
+    "source_section": "kip-848",
+    "needs_live": false
+  },
+  {
+    "id": "q12",
+    "question": "What are Share Groups in KIP-932 and how do they differ from standard consumer groups?",
+    "type": "static",
+    "expected_answer": "Share Groups (KIP-932) enable point-to-point work-queue consumption where multiple consumers can fetch records concurrently from the same partition, with individual record-level acknowledgments (ACK/RELEASE/REJECT) rather than partition-level exclusive ownership and linear offset commits.",
+    "source_section": "kip-932",
+    "needs_live": false
+  },
+  {
+    "id": "q13",
+    "question": "How does Kafka Tiered Storage (KIP-405) separate local tier from remote tier storage?",
+    "type": "static",
+    "expected_answer": "KIP-405 retains the active segment and recent segments on local disks (NVMe/SSD) for low-latency tail writes and reads, while closed older log segments are asynchronously copied to remote cloud object storage (S3/GCS/Azure Blob) by the RemoteLogManager, allowing historical reads via standard Fetch requests without local disk constraints.",
+    "source_section": "kip-405",
+    "needs_live": false
+  },
+  {
+    "id": "q14",
+    "question": "What is the function of delete tombstones in compacted topics and how long are they retained?",
+    "type": "static",
+    "expected_answer": "A tombstone is a message with a target key and a null payload indicating key deletion. Cleaner threads preserve tombstones across compaction runs until delete.retention.ms (default 24 hours / 86,400,000 ms) has elapsed, giving consumers time to process the deletion before the tombstone is purged from disk.",
+    "source_section": "doc-log-compaction",
+    "needs_live": false
+  },
+  {
+    "id": "q15",
+    "question": "What does unclean.leader.election.enable control and why is it defaulted to false?",
+    "type": "static",
+    "expected_answer": "unclean.leader.election.enable controls whether out-of-sync replicas (outside the ISR) can be elected as partition leader when all ISR members fail. It defaults to false because electing an out-of-sync replica causes silent data loss and log divergence, though setting it to true prioritizes availability over consistency.",
+    "source_section": "config-broker",
+    "needs_live": false
+  },
+  {
+    "id": "q16",
+    "question": "What is the relationship between session.timeout.ms, heartbeat.interval.ms, and max.poll.interval.ms in Kafka consumers?",
+    "type": "static",
+    "expected_answer": "session.timeout.ms (default 45s) is the coordinator threshold for detecting dead consumers; heartbeat.interval.ms (default 3s) is the background thread heartbeat rate and must be <= 1/3 of session timeout. max.poll.interval.ms (default 5 min) is the maximum allowable processing time on the application thread between poll() calls before the consumer is evicted.",
+    "source_section": "config-consumer",
+    "needs_live": false
+  },
+  {
+    "id": "q17",
+    "question": "How does producer idempotence (enable.idempotence=true) detect and prevent duplicate records on broker restarts?",
+    "type": "static",
+    "expected_answer": "When enable.idempotence is true, the broker assigns a Producer ID (PID) and tracks sequence numbers per partition. Sequence state is persisted across broker restarts in leader epoch checkpoints and snapshots, allowing brokers to recognize retried sequence numbers and deduplicate duplicate batches without data loss.",
+    "source_section": "doc-transactions-eos",
+    "needs_live": false
+  },
+  {
+    "id": "q18",
+    "question": "What is the Pre-Vote protocol in KRaft introduced by KIP-996 and what problem does it solve?",
+    "type": "static",
+    "expected_answer": "KIP-996 introduces a Raft Pre-Vote phase where a candidate controller checks if peers would vote for it before incrementing its term. This prevents partitioned or isolated controller nodes from incrementing terms and disrupting the active controller quorum when rejoining the cluster.",
+    "source_section": "kip-996",
+    "needs_live": false
+  },
+  {
+    "id": "q19",
+    "question": "What major architectural changes occurred in the Apache Kafka 4.0.0 release?",
+    "type": "static",
+    "expected_answer": "Apache Kafka 4.0.0 completely removed ZooKeeper (making KRaft the sole metadata engine), enabled KIP-848 Next-Gen Consumer Rebalancing by default (group.protocol=consumer), added KIP-932 Queues (Share Groups) early access, removed Java 8/11 support (requiring Java 17+), and added KIP-1018 ephemeral topics.",
+    "source_section": "rel-4-0-0",
+    "needs_live": false
+  },
+  {
+    "id": "q20",
+    "question": "What does auto.offset.reset do when set to earliest, latest, or none?",
+    "type": "static",
+    "expected_answer": "auto.offset.reset defines where a consumer starts reading when no initial offset exists or stored offset is out of range: 'earliest' resets to the partition's start offset, 'latest' resets to the end offset (LEO), and 'none' throws an OffsetOutOfRangeException to the consumer application.",
+    "source_section": "config-consumer",
+    "needs_live": false
+  },
+  {
+    "id": "q21",
+    "question": "What bug does Jira ticket KAFKA-14400 describe and what was the resolution?",
+    "type": "live",
+    "expected_answer": "Jira issue KAFKA-14400 (Fix KRaft cluster metadata quorum state transitions during controller leader failover): Status is Resolved, Component is KRaft. Summary: Addresses race conditions in KRaft active controller leader elections where standby controllers temporarily failed to process metadata snapshots during split-brain recoveries.",
+    "source_section": "jira",
+    "needs_live": true
+  },
+  {
+    "id": "q22",
+    "question": "Look up Kafka Jira issue KAFKA-15000 and summarize its status and affected component.",
+    "type": "live",
+    "expected_answer": "Jira issue KAFKA-15000 (Add client-side telemetry push plugin support for Kafka Java clients): Status is Resolved, Component is Clients. Summary: Implements KIP-714 telemetry push reporter plugins for KafkaProducer and KafkaConsumer to automatically push client performance metrics to broker telemetry endpoints.",
+    "source_section": "jira",
+    "needs_live": true
+  },
+  {
+    "id": "q23",
+    "question": "What recent discussions have occurred on the Kafka dev mailing list regarding KIP-848 consumer rebalance protocol?",
+    "type": "live",
+    "expected_answer": "Kafka dev mailing list thread '[DISCUSS] KIP-848: Next Generation Consumer Rebalance Protocol Implementation Progress': Discussions on finalizing server-side partition assignors in the Group Coordinator and early testing results with the new ConsumerGroupHeartbeat RPC protocol.",
+    "source_section": "mailing_list",
+    "needs_live": true
+  },
+  {
+    "id": "q24",
+    "question": "Find Jira issues related to KRaft controller quorum snapshot corruption.",
+    "type": "live",
+    "expected_answer": "Found relevant issue Fix corrupt snapshot loading in KRaft metadata partition: Fixed edge-case CRC checksum validation failure when reading truncated KRaft snapshot checkpoint files on broker restart.",
+    "source_section": "jira",
+    "needs_live": true
+  },
+  {
+    "id": "q25",
+    "question": "What is the status of Jira issue KAFKA-16000?",
+    "type": "live",
+    "expected_answer": "Jira issue KAFKA-16000 (Remove ZooKeeper dependencies and command line tools for Apache Kafka 4.0): Status is Resolved, Component is Core. Summary: Completed the full removal of ZooKeeper from Kafka codebase, eliminating --zookeeper flags, zookeeper broker configs, and internal ZK listeners.",
+    "source_section": "jira",
+    "needs_live": true
+  },
+  {
+    "id": "q26",
+    "question": "Search the dev mailing list for discussions on Tiered Storage RemoteLogManager memory leaks.",
+    "type": "live",
+    "expected_answer": "Kafka dev mailing list thread '[FIX] RemoteLogManager chunk cache buffer leak under heavy read load': Thread discussing fix for direct byte buffer leak in Tiered Storage RemoteLogManager chunk cache during large segment streaming from object storage.",
+    "source_section": "mailing_list",
+    "needs_live": true
+  },
+  {
+    "id": "q27",
+    "question": "Search Jira for open issues related to CooperativeStickyAssignor partition reassignment bugs.",
+    "type": "live",
+    "expected_answer": "Found relevant issue CooperativeStickyAssignor partition oscillation during consumer rolling restarts: Fixed bug where consumers in cooperative rebalance repeatedly revoked and re-assigned identical partition sets when members had uneven subscription generation IDs.",
+    "source_section": "jira",
+    "needs_live": true
+  },
+  {
+    "id": "q28",
+    "question": "Look up Jira issue KAFKA-14000 and return its title, component, and resolution status.",
+    "type": "live",
+    "expected_answer": "Jira issue KAFKA-14000 (Support dynamic SSL keystore and truststore reload without broker restart): Status is Resolved, Component is Security. Summary: Enables dynamic reconfiguration of SSL certificates and keys on active broker listeners via IncrementalAlterConfigs API without dropping active client connections.",
+    "source_section": "jira",
+    "needs_live": true
+  },
+  {
+    "id": "q29",
+    "question": "Search recent threads in the users mailing list regarding offset commit timeouts.",
+    "type": "live",
+    "expected_answer": "Kafka users mailing list thread 'CommitFailedException on long-running consumer poll loop': Troubleshooting thread explaining why slow record processing exceeding max.poll.interval.ms leads to coordinator offset commit rejection.",
+    "source_section": "mailing_list",
+    "needs_live": true
+  },
+  {
+    "id": "q30",
+    "question": "Look up Jira ticket KAFKA-15555 and summarize its description.",
+    "type": "live",
+    "expected_answer": "Jira issue KAFKA-15555 (Optimized metadata image replication in KRaft broker metadata caches): Status is Resolved, Component is KRaft. Summary: Reduced CPU overhead when applying incremental metadata delta batches to in-memory broker metadata caches in large multi-node clusters.",
+    "source_section": "jira",
+    "needs_live": true
+  },
+  {
+    "id": "q31",
+    "question": "Search the Kafka dev mailing list for release discussion threads for Kafka 4.0.",
+    "type": "live",
+    "expected_answer": "Kafka dev mailing list thread '[VOTE] Release Apache Kafka 4.0.0 (RC0)': Official release voting thread for Apache Kafka 4.0.0 highlighting the complete ZooKeeper removal and KIP-848 GA.",
+    "source_section": "mailing_list",
+    "needs_live": true
+  },
+  {
+    "id": "q32",
+    "question": "Search Jira for issues regarding idempotent producer sequence number out-of-order errors.",
+    "type": "live",
+    "expected_answer": "Found relevant issue OutOfOrderSequenceException recovery on idempotent producer reconnect: Hardened producer sequence number resynchronization following broker leader failovers to prevent spurious OutOfOrderSequenceExceptions.",
+    "source_section": "jira",
+    "needs_live": true
+  },
+  {
+    "id": "q33",
+    "question": "Look up Jira issue KAFKA-13000 and describe its component and status.",
+    "type": "live",
+    "expected_answer": "Jira issue KAFKA-13000 (Support topic IDs in delete topics and metadata requests): Status is Resolved, Component is Core. Summary: Implements KIP-516 128-bit UUID topic identifiers across broker metadata requests to prevent topic deletion race conditions.",
+    "source_section": "jira",
+    "needs_live": true
+  },
+  {
+    "id": "q34",
+    "question": "Search dev mailing list for vote threads on KIP-932 Queues for Kafka.",
+    "type": "live",
+    "expected_answer": "Kafka dev mailing list thread '[VOTE] KIP-932: Queues for Kafka (Share Groups)': Community voting thread adopting KIP-932 for point-to-point share group queue consumption in Kafka.",
+    "source_section": "mailing_list",
+    "needs_live": true
+  },
+  {
+    "id": "q35",
+    "question": "Search Jira for open bug reports affecting Kafka Streams state store recovery.",
+    "type": "live",
+    "expected_answer": "Found relevant issue RocksDB state store corruption on unclean standby task shutdown: Fixed checkpoint file corruption in RocksDB state stores during unclean container termination in Kubernetes deployments.",
+    "source_section": "jira",
+    "needs_live": true
+  },
+  {
+    "id": "q36",
+    "question": "What is the recipe for baking chocolate chip cookies?",
+    "type": "out_of_scope",
+    "expected_answer": "I am a specialized Apache Kafka assistant. I can only answer questions related to Apache Kafka documentation, configurations, KIPs, Jira issues, and mailing list discussions.",
+    "source_section": "refusal",
+    "needs_live": false
+  },
+  {
+    "id": "q37",
+    "question": "Who won the FIFA World Cup in 2022?",
+    "type": "out_of_scope",
+    "expected_answer": "I am a specialized Apache Kafka assistant. I can only answer questions related to Apache Kafka documentation, configurations, KIPs, Jira issues, and mailing list discussions.",
+    "source_section": "refusal",
+    "needs_live": false
+  },
+  {
+    "id": "q38",
+    "question": "How do I install and configure Apache Spark on a Kubernetes cluster?",
+    "type": "out_of_scope",
+    "expected_answer": "I am a specialized Apache Kafka assistant. I can only answer questions related to Apache Kafka documentation, configurations, KIPs, Jira issues, and mailing list discussions.",
+    "source_section": "refusal",
+    "needs_live": false
+  },
+  {
+    "id": "q39",
+    "question": "What is the current weather forecast for Tokyo this weekend?",
+    "type": "out_of_scope",
+    "expected_answer": "I am a specialized Apache Kafka assistant. I can only answer questions related to Apache Kafka documentation, configurations, KIPs, Jira issues, and mailing list discussions.",
+    "source_section": "refusal",
+    "needs_live": false
+  },
+  {
+    "id": "q40",
+    "question": "Can you write a Python script to scrape stock market prices using Yahoo Finance?",
+    "type": "out_of_scope",
+    "expected_answer": "I am a specialized Apache Kafka assistant. I can only answer questions related to Apache Kafka documentation, configurations, KIPs, Jira issues, and mailing list discussions.",
+    "source_section": "refusal",
+    "needs_live": false
+  }
+]

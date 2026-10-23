@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "data": [
+    {
+      "subject": "[DISCUSS] KIP-848: Next Generation Consumer Rebalance Protocol Implementation Progress",
+      "date": "2024-09-10",
+      "author": "dev@kafka.apache.org",
+      "snippet": "Discussions on finalizing server-side partition assignors in the Group Coordinator and early testing results with the new ConsumerGroupHeartbeat RPC protocol.",
+      "url": "https://lists.apache.org/thread/kip848-rebalance-protocol"
+    }
+  ]
+}

@@ -1,0 +1,412 @@
+[
+  {
+    "chunk_id": "config-broker_chunk_00",
+    "doc_id": "config-broker",
+    "title": "Kafka Broker Server Configuration Reference and High Availability",
+    "text": "# Kafka Broker Server Configuration Reference and High Availability\n\n## 1. Broker High Availability & Durability Configurations\n\n### `min.insync.replicas`\n- **Type:** int | **Default:** `1` | **Production Recommendation:** `2` (when `replication.factor=3`)\n- When a producer sends records with `acks=all`, `min.insync.replicas` specifies the minimum number of in-sync replicas (`ISR`) that must acknowledge the write. If the active ISR count drops below this value, the broker rejects producer writes with `NotEnoughReplicasException`, protecting against data loss during broker outages.\n\n### `default.replication.factor` & `num.partitions`\n- **`default.replication.factor` (Type: int, Default: 1, Production Recommendation: 3):** Default replication factor for automatically created topics.\n- **`num.partitions` (Type: int, Default: 1):** Default number of partitions per auto-created topic.\n\n### `unclean.leader.election.enable`\n- **Type:** boolean | **Default:** `false`\n- If set to `true`, out-of-sync replicas (replicas outside the ISR) can be elected as partition leader if all ISR members fail. While this prevents topic downtime, it causes silent data loss and log divergence. Keep `false` in production systems.\n\n### `auto.create.topics.enable`\n- **Type:** boolean | **Default:** `true` | **Production Recommendation:** `false`\n- When `false`, brokers reject metadata requests for non-existent topics, preventing accidental topic creation due to client typos.\n\n## 2. Storage & Retention Configurations\n- **`log.retention.hours` (Type: int, Default: 168 hours / 7 days):** Number of hours to retain log segments before deletion.\n- **`log.retention.bytes` (Type: long, Default: -1 / unlimited):** Maximum total size of a partition log on disk before older segments are deleted.\n- **`log.segment.bytes` (Type: int, Default: 1073741824 bytes / 1 GB):** Maximum size of a single `.log` segment file before rolling over.\n- **`log.cleanup.policy` (Type: string, Default: `delete`):** `delete` (time/size retention), `compact` (key-based deduplication), or `compact,delete`.\n- **`log.cleaner.threads",
+    "chunk_index": 0,
+    "source_url": "https://kafka.apache.org/documentation/#brokerconfigs",
+    "doc_type": "config_reference",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "config-broker_chunk_01",
+    "doc_id": "config-broker",
+    "title": "Kafka Broker Server Configuration Reference and High Availability",
+    "text": "`log.cleanup.policy` (Type: string, Default: `delete`):** `delete` (time/size retention), `compact` (key-based deduplication), or `compact,delete`.\n- **`log.cleaner.threads` (Type: int, Default: 1):** Number of background cleaner threads for log compaction.\n- **`min.cleanable.dirty.ratio` (Type: double, Default: 0.5):** Minimum ratio of dirty tail records to total log records required before compaction triggers.\n\n## 3. KRaft Quorum Configurations\n- **`process.roles` (Type: list, Default: `[]`):** Roles executed by this JVM: `broker`, `controller`, or `broker,controller`.\n- **`node.id` (Type: int, Default: `-1`):** Unique non-negative integer ID identifying the node in the cluster.\n- **`controller.quorum.voters` (Type: list):** Voter list in format `<node_id>@<host>:<port>`. Example: `1@ctrl1:9093,2@ctrl2:9093,3@ctrl3:9093`.\n- **`controller.listener.names` (Type: string):** Listener name used for Raft controller RPCs (e.g. `CONTROLLER`).",
+    "chunk_index": 1,
+    "source_url": "https://kafka.apache.org/documentation/#brokerconfigs",
+    "doc_type": "config_reference",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "config-consumer_chunk_00",
+    "doc_id": "config-consumer",
+    "title": "Kafka Consumer Configuration Reference and Group Management",
+    "text": "# Kafka Consumer Configuration Reference and Group Management\n\n## 1. Consumer Core Configurations\n\n### `group.id`\n- **Type:** string | **Default:** `null`\n- Unique identifier of the consumer group this consumer joins. All consumers with the same `group.id` share topic partition assignments.\n\n### `auto.offset.reset`\n- **Type:** string | **Default:** `latest` | **Valid Values:** `[latest, earliest, none]`\n- **`latest`:** Automatically reset consumer offset to the latest log end offset (`LEO`) if no initial offset exists or if stored offset is out of range.\n- **`earliest`:** Reset consumer offset to the earliest available offset (log start offset) in the partition.\n- **`none`:** Throw `OffsetOutOfRangeException` if no previous offset is found for the group.\n\n### `enable.auto.commit` & `auto.commit.interval.ms`\n- **`enable.auto.commit` (Type: boolean, Default: `true`):** When `true`, consumer offsets are periodically committed in the background during `poll()`. For at-least-once or transactional processing, set to `false` and commit offsets manually via `commitSync()` or `commitAsync()`.\n- **`auto.commit.interval.ms` (Type: int, Default: 5000 ms / 5s):** Frequency of background automatic offset commits.\n\n### `session.timeout.ms` & `heartbeat.interval.ms`\n- **`session.timeout.ms` (Type: int, Default: 45000 ms / 45s):** Timeout used by the broker Group Coordinator to detect consumer failure. If no heartbeat is received within this duration, the consumer is evicted from the group and a rebalance is triggered.\n- **`heartbeat.interval.ms` (Type: int, Default: 3000 ms / 3s):** Frequency of heartbeat signals sent by the consumer background thread. Must not exceed 1/3 of `session.timeout.ms`.\n\n### `max.poll.interval.ms` & `max.poll.records`\n- **`max.poll.interval.ms` (Type: int, Default: 300000 ms / 5 min):** Maximum allowable time between successive `poll()` calls on the application thread. If processing a batch takes longer than this interval, the consumer is assumed hung and leaves the group.\n- **`max.poll.records` (Type: int, Default: 500):** Maximum number of records returned in a single",
+    "chunk_index": 0,
+    "source_url": "https://kafka.apache.org/documentation/#consumerconfigs",
+    "doc_type": "config_reference",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "config-consumer_chunk_01",
+    "doc_id": "config-consumer",
+    "title": "Kafka Consumer Configuration Reference and Group Management",
+    "text": "the application thread. If processing a batch takes longer than this interval, the consumer is assumed hung and leaves the group.\n- **`max.poll.records` (Type: int, Default: 500):** Maximum number of records returned in a single `poll()` call. Tuning this prevents exceeding `max.poll.interval.ms`.\n\n### `fetch.min.bytes`, `fetch.max.wait.ms`, `fetch.max.bytes`\n- **`fetch.min.bytes` (Type: int, Default: 1 byte):** Minimum data bytes the broker must accumulate before responding to a fetch request. Increasing this (e.g., to 100KB) improves throughput at the expense of latency.\n- **`fetch.max.wait.ms` (Type: int, Default: 500 ms):** Maximum time the broker will block waiting for `fetch.min.bytes` to accumulate before returning.\n- **`fetch.max.bytes` (Type: int, Default: 52428800 bytes / 50 MB):** Maximum total data returned across all partitions in a single fetch response.\n\n### `isolation.level`\n- **Type:** string | **Default:** `read_uncommitted` | **Valid Values:** `[read_uncommitted, read_committed]`\n- **`read_uncommitted`:** Returns all records including uncommitted and aborted transactional messages.\n- **`read_committed`:** Filters out aborted transactional batches and blocks consumption past ongoing transactional Last Stable Offsets (LSO).\n\n### `partition.assignment.strategy`\n- **Type:** list | **Default:** `[org.apache.kafka.clients.consumer.RangeAssignor, org.apache.kafka.clients.consumer.CooperativeStickyAssignor]`\n- Supported strategies: `CooperativeStickyAssignor` (recommended for classic rebalancing), `RangeAssignor`, `RoundRobinAssignor`, `StickyAssignor`.\n\n### `group.protocol` (KIP-848)\n- **Type:** string | **Default:** `classic` (in 3.x), `consumer` (in 4.0) | **Valid Values:** `[classic, consumer]`\n- Enables the KIP-848 Next-Generation server-side consumer rebalancing protocol.",
+    "chunk_index": 1,
+    "source_url": "https://kafka.apache.org/documentation/#consumerconfigs",
+    "doc_type": "config_reference",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "config-producer_chunk_00",
+    "doc_id": "config-producer",
+    "title": "Kafka Producer Configuration Reference and Performance Tuning",
+    "text": "# Kafka Producer Configuration Reference and Performance Tuning\n\n## 1. Producer Core Configurations\n\n### `acks`\n- **Type:** string | **Default:** `all` (since Kafka 3.0) | **Valid Values:** `[0, 1, all, -1]`\n- **`acks=0`:** The producer does not wait for any acknowledgment from the broker. The record is immediately considered sent once written to the network socket buffer. Offers the highest throughput but risks silent data loss if brokers crash.\n- **`acks=1`:** The producer waits for acknowledgment from the partition leader broker only. Data is durable against leader failure only after followers replicate it.\n- **`acks=all` (or `-1`):** The producer waits for acknowledgment from the partition leader and all currently in-sync replicas (`min.insync.replicas`). Guarantees zero message loss as long as at least `min.insync.replicas` brokers remain online.\n\n### `enable.idempotence`\n- **Type:** boolean | **Default:** `true` (since Kafka 3.0)\n- When enabled, the producer appends a unique Producer ID (`PID`) and sequence number to each record batch, enabling brokers to deduplicate retried requests.\n- **Prerequisites:** Requires `acks=all`, `retries > 0`, and `max.in.flight.requests.per.connection <= 5`.\n\n### `batch.size` & `linger.ms`\n- **`batch.size` (Type: int, Default: 16384 bytes / 16 KB):** Maximum byte buffer size allocated for batching records destined for the same partition. Larger batches improve network throughput and compression ratios at the expense of memory.\n- **`linger.ms` (Type: long, Default: 0 ms):** Artificial delay introduced on the producer thread to allow additional records to accumulate into a batch before dispatching. Setting `linger.ms=5` to `linger.ms=20` significantly improves batching and throughput with negligible latency impact.\n\n### `compression.type`\n- **Type:** string | **Default:** `none` | **Valid Values:** `[none, gzip, snappy, lz4, zstd]`\n- Compresses entire record batches. `snappy` and `lz4` offer excellent throughput with low CPU overhead; `zstd` provides the highest compression ratio for text and JSON payloads.\n\n### `buffer.memory` & `max.block.ms`\n- **`buffer",
+    "chunk_index": 0,
+    "source_url": "https://kafka.apache.org/documentation/#producerconfigs",
+    "doc_type": "config_reference",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "config-producer_chunk_01",
+    "doc_id": "config-producer",
+    "title": "Kafka Producer Configuration Reference and Performance Tuning",
+    "text": "record batches. `snappy` and `lz4` offer excellent throughput with low CPU overhead; `zstd` provides the highest compression ratio for text and JSON payloads.\n\n### `buffer.memory` & `max.block.ms`\n- **`buffer.memory` (Type: long, Default: 33554432 bytes / 32 MB):** Total memory allocated to the producer `BufferPool` for buffering unsent records.\n- **`max.block.ms` (Type: long, Default: 60000 ms / 60s):** Maximum time `KafkaProducer.send()` or `partitionsFor()` will block when the `buffer.memory` is exhausted or metadata is unavailable before throwing `TimeoutException`.\n\n### `max.in.flight.requests.per.connection`\n- **Type:** int | **Default:** `5`\n- Maximum number of unacknowledged requests sent over a single TCP connection. When idempotence is enabled, values up to `5` maintain strict ordering guarantees.\n\n### `retries` & `retry.backoff.ms` & `delivery.timeout.ms`\n- **`retries` (Type: int, Default: 2147483647 / MAX_INT):** Number of automatic retries on transient errors (`NotLeaderOrFollowerException`, `NetworkException`).\n- **`retry.backoff.ms` (Type: long, Default: 100 ms):** Initial backoff delay between retry attempts.\n- **`delivery.timeout.ms` (Type: int, Default: 120000 ms / 2 min):** Upper bound on the total time between `send()` invocation and successful broker acknowledgment, including all retries.\n\n### `transactional.id`\n- **Type:** string | **Default:** `null`\n- Unique string identifier required for transactional producers. Enables multi-partition atomic transactions and Exactly-Once Semantics (EOS). Automatically enables `enable.idempotence=true`.",
+    "chunk_index": 1,
+    "source_url": "https://kafka.apache.org/documentation/#producerconfigs",
+    "doc_type": "config_reference",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "doc-arch-storage_chunk_00",
+    "doc_id": "doc-arch-storage",
+    "title": "Kafka Storage Architecture, Record Batches, and Log Segments",
+    "text": "# Kafka Storage Architecture, Record Batches, and Log Segments\n\n## 1. Storage Architecture Overview\nApache Kafka organizes data into topics, where each topic is subdivided into one or more partitions. A partition is the fundamental unit of parallelism, persistence, and ordering in Kafka. Each partition represents an append-only, ordered, immutable sequence of message record batches written sequentially to local disk.\n\n### Zero-Copy Data Transfer\nKafka achieves high network throughput through Linux pagecache and zero-copy data transfer. Instead of maintaining message caches in JVM heap memory, Kafka relies on the operating system OS pagecache. When consumers fetch data:\n1. Data is transferred from the OS pagecache directly to the network socket descriptor using the `sendfile()` system call (Java `FileChannel.transferTo()`).\n2. This avoids copying data through user-space JVM memory and eliminates JVM garbage collection pauses.\n\n## 2. Physical Log Segment Files\nPartitions are divided into multiple log segments on disk. Each segment consists of four primary files located in the broker's data directory (`<topic>-<partition_id>/`):\n1. **`.log` (Log Segment File):** Contains raw binary data formatted as Kafka RecordBatches.\n2. **`.index` (Offset Index):** A memory-mapped sparse index mapping logical record offsets to physical byte positions within the `.log` file. Entries are written every 4KB (controlled by `index.interval.bytes`).\n3. **`.timeindex` (Time Index):** Maps message timestamps to logical record offsets for time-based lookups (`offsetsForTimes()`) and timestamp-based log retention.\n4. **`leader-epoch-checkpoint`:** Records the leader epoch and corresponding start offset for each epoch to prevent log truncation divergence during partition leader failovers.\n\n## 3. RecordBatch Memory Layout (Record Format v2)\nSince Kafka 0.11.0, records are grouped into `RecordBatch` envelopes with the following binary layout:\n- `baseOffset` (8 bytes / Int64): First logical offset in the batch.\n- `batchLength` (4 bytes / Int32): Total byte length of the record batch.\n- `partitionLeaderEpoch` (4 bytes / Int32): Epoch of the broker leader that wrote the batch.\n- `magic` (1 byte / Int8): Record format version (`2` for Kafka 0.11+).\n- `crc` (4 bytes / Int32",
+    "chunk_index": 0,
+    "source_url": "https://kafka.apache.org/documentation/#design",
+    "doc_type": "core_docs",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "doc-arch-storage_chunk_01",
+    "doc_id": "doc-arch-storage",
+    "title": "Kafka Storage Architecture, Record Batches, and Log Segments",
+    "text": "bytes / Int32): Epoch of the broker leader that wrote the batch.\n- `magic` (1 byte / Int8): Record format version (`2` for Kafka 0.11+).\n- `crc` (4 bytes / Int32): CRC32-C checksum covering attributes through records.\n- `attributes` (2 bytes / Int16): Bit flags:\n  - Bits 0-2: Compression codec (`0`: None, `1`: GZIP, `2`: Snappy, `3`: LZ4, `4`: ZSTD).\n  - Bit 3: Timestamp type (`0`: CreateTime, `1`: LogAppendTime).\n  - Bit 4: Is Transactional (`1` if part of a transaction).\n  - Bit 5: Is Control Batch (`1` for `COMMIT` or `ABORT` transaction markers).\n- `lastOffsetDelta` (4 bytes / Int32): Offset difference between last record and base offset.\n- `baseTimestamp` (8 bytes / Int64): Base timestamp for delta calculations.\n- `maxTimestamp` (8 bytes / Int64): Maximum timestamp among all records in the batch.\n- `producerId` (8 bytes / Int64): Producer ID (`PID`) assigned for idempotence/transactions.\n- `producerEpoch` (2 bytes / Int16): Producer epoch to fence zombie producers.\n- `baseSequence` (4 bytes / Int32): First sequence number in the batch.\n- `records` (Array): Array of individual variable-length records with key, value, and headers.\n\n## 4. Log Rolling & Retention Policies\nLog segments roll over and start a new active segment under the following conditions:\n- **Size Roll:** The active segment reaches `segment.bytes` (default: 1,073,741,824 bytes / 1 GB).\n- **Time Roll:** The active segment reaches `segment.ms` (default: 604,800,000 ms / 7 days).\n- **Index Full:** The `.index` or `.timeindex` reaches `segment.index.bytes` (default: 10,485,760 bytes / 10 MB).\n\nRetention rules discard older inactive segments based on:\n- `log.cleanup.policy=delete`: Segments older than `log.retention.hours` (default 168 hours / 7 days) or when partition size exceeds `log.retention.bytes` are marked for deletion and removed after `log.segment.delete",
+    "chunk_index": 1,
+    "source_url": "https://kafka.apache.org/documentation/#design",
+    "doc_type": "core_docs",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "doc-arch-storage_chunk_02",
+    "doc_id": "doc-arch-storage",
+    "title": "Kafka Storage Architecture, Record Batches, and Log Segments",
+    "text": "- `log.cleanup.policy=delete`: Segments older than `log.retention.hours` (default 168 hours / 7 days) or when partition size exceeds `log.retention.bytes` are marked for deletion and removed after `log.segment.delete.delay.ms` (default 60,000 ms).",
+    "chunk_index": 2,
+    "source_url": "https://kafka.apache.org/documentation/#design",
+    "doc_type": "core_docs",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "doc-consumer-rebalance_chunk_00",
+    "doc_id": "doc-consumer-rebalance",
+    "title": "Consumer Group Protocols, Rebalance Algorithms, and KIP-848",
+    "text": "# Consumer Group Protocols, Rebalance Algorithms, and KIP-848\n\n## 1. Consumer Group Architecture\nA Consumer Group is a cooperative pool of consumer instances that collaboratively read from a set of subscribed topics. Partitions are divided among active group members so that each partition is assigned to exactly one consumer within the group at any given time.\n\nThe group is managed by the **Group Coordinator**, a broker elected by hashing `group.id` to a partition of the internal `__consumer_offsets` topic.\n\n## 2. Classic Consumer Rebalance Protocol\nIn the classic protocol (prior to KIP-848), partition assignment is calculated client-side by a designated *Group Leader* consumer:\n1. **JoinGroup Phase:** When a consumer starts or group membership changes, all consumers send `JoinGroup` RPCs to the Group Coordinator. The coordinator selects one member as the Group Leader and sends it the metadata of all active consumers.\n2. **SyncGroup Phase:** The Group Leader runs the partition assignment strategy algorithm (e.g., `RangeAssignor`, `CooperativeStickyAssignor`) and sends the calculated assignment map to the coordinator in a `SyncGroup` request. Non-leader consumers send empty `SyncGroup` requests. The coordinator responds to each consumer with its assigned partition list.\n\n### Rebalance Assignor Strategies\n- **Eager Rebalance (Stop-the-World):** Used by `RangeAssignor` and `RoundRobinAssignor`. When a rebalance occurs, all consumers revoke all assigned partitions simultaneously before receiving new assignments. Data consumption pauses completely across the entire group during the rebalance barrier.\n- **Cooperative Sticky Rebalance (`CooperativeStickyAssignor`):** Partitions are migrated incrementally over two consecutive rebalance rounds. Consumers only revoke partitions that are actively moving to another member; consumers holding unaffected partitions continue processing data without downtime.\n\n## 3. Next-Generation Consumer Protocol (KIP-848)\nKIP-848 fundamentally re-architects the consumer group protocol in Apache Kafka 4.0 (`group.protocol=consumer`):\n- **Server-Side Assignment:** Partition assignment algorithms move from client-side Java code to the broker **Group Coordinator**, eliminating client version discrepancies and simplifying client implementations across C++, Python, Go, and Rust.\n- **Incremental Heartbeat Protocol (`ConsumerGroupHeartbeat`):** Consumers no longer undergo heavy `JoinGroup`/`SyncGroup` rebalance barriers. Instead",
+    "chunk_index": 0,
+    "source_url": "https://kafka.apache.org/documentation/#consumer_rebalance",
+    "doc_type": "core_docs",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "doc-consumer-rebalance_chunk_01",
+    "doc_id": "doc-consumer-rebalance",
+    "title": "Consumer Group Protocols, Rebalance Algorithms, and KIP-848",
+    "text": "discrepancies and simplifying client implementations across C++, Python, Go, and Rust.\n- **Incremental Heartbeat Protocol (`ConsumerGroupHeartbeat`):** Consumers no longer undergo heavy `JoinGroup`/`SyncGroup` rebalance barriers. Instead, each consumer sends lightweight periodic heartbeats. The coordinator assigns and revokes partitions incrementally in heartbeat responses.\n- **Zero Stop-the-World Downtime:** Adding or removing a consumer only affects the migrating partitions; all other consumers continue uninterrupted streaming.\n\n## 4. Liveness, Timeouts, and Static Membership\n- `session.timeout.ms` (default 45s): Maximum duration without heartbeats before the coordinator marks a consumer dead and reassigns its partitions.\n- `heartbeat.interval.ms` (default 3s): Frequency of heartbeats sent by the consumer background thread (must be <= 1/3 of `session.timeout.ms`).\n- `max.poll.interval.ms` (default 300,000 ms / 5 min): Maximum allowable time between successive `poll()` invocations on the application thread. If data processing takes longer than `max.poll.interval.ms`, the consumer leaves the group to prevent partition starvation.\n- **Static Membership (`group.instance.id`):** By assigning a unique static instance ID to a consumer, the coordinator preserves its partition assignment during rolling restarts for up to `session.timeout.ms`, preventing unnecessary rebalances during application deployments.",
+    "chunk_index": 1,
+    "source_url": "https://kafka.apache.org/documentation/#consumer_rebalance",
+    "doc_type": "core_docs",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "doc-kraft-consensus_chunk_00",
+    "doc_id": "doc-kraft-consensus",
+    "title": "KRaft Consensus, Metadata Quorum, and Controller Architecture",
+    "text": "# KRaft Consensus, Metadata Quorum, and Controller Architecture\n\n## 1. The KRaft Architecture (Kafka Raft Metadata Mode)\nIn Apache Kafka 4.0, KRaft is the sole supported metadata mode; Apache ZooKeeper has been completely removed from the codebase. KRaft integrates a specialized event-driven Raft consensus algorithm directly into Kafka controller nodes.\n\n### Core Motivation and Advantages over ZooKeeper\n- **Scale:** Supports clusters with tens of millions of partitions by eliminating external ZooKeeper synchronization bottlenecks.\n- **Fast Failovers:** In ZooKeeper mode, electing a new controller required loading the entire cluster metadata tree from ZooKeeper into JVM memory, taking minutes on large clusters. In KRaft, all standby controllers and brokers maintain a continuously updated, in-memory metadata cache by tailing the metadata log, enabling sub-second controller failovers.\n- **Unified Security & Networking:** Eliminates separate ZooKeeper client ports, ACLs, and firewall rules; all controller communication uses standard Kafka SASL/TLS RPCs.\n\n## 2. Quorum Controller Roles & Nodes\nKRaft clusters divide nodes into specific process roles configured by `process.roles`:\n- `process.roles=controller`: Dedicated quorum controller node.\n- `process.roles=broker`: Dedicated data broker node handling topic partitions and client traffic.\n- `process.roles=broker,controller`: Combined mode where a single JVM runs both broker and controller roles (ideal for development or small clusters).\n\n### Active Leader Controller vs. Standby Controllers\n- **Active Controller (Leader):** Elected by the Raft quorum. Only the active controller handles write requests for cluster metadata (e.g., `CreateTopics`, `AlterPartition`, `AlterConfigs`, `CreateAcls`). Every metadata change is committed as an event record to the `@metadata` topic log.\n- **Standby Controllers (Followers):** Replicate the `@metadata` partition 0 log from the active controller using Raft `Fetch` and `FetchSnapshot` RPCs. They participate in quorum voting and are ready for immediate failover.\n- **Brokers:** Regular broker nodes tail the `@metadata` partition 0 log asynchronously via standard `Fetch` requests and update their local in-memory metadata image.\n\n## 3. The `@metadata` Replicated Topic\nAll cluster state is represented as an append-only event stream stored on partition 0 of the",
+    "chunk_index": 0,
+    "source_url": "https://kafka.apache.org/documentation/#kraft",
+    "doc_type": "core_docs",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "doc-kraft-consensus_chunk_01",
+    "doc_id": "doc-kraft-consensus",
+    "title": "KRaft Consensus, Metadata Quorum, and Controller Architecture",
+    "text": "0 log asynchronously via standard `Fetch` requests and update their local in-memory metadata image.\n\n## 3. The `@metadata` Replicated Topic\nAll cluster state is represented as an append-only event stream stored on partition 0 of the internal `@metadata` topic:\n- Metadata records represent state transitions: `RegisterBrokerRecord`, `TopicRecord`, `PartitionRecord`, `ConfigRecord`, `AclRecord`.\n- Periodically, the active controller creates a metadata snapshot file (`<offset>.checkpoint`) summarizing current cluster state, allowing new or lagging nodes to catch up quickly without replaying historical logs from offset zero.\n\n## 4. Leader Election and Pre-Vote (KIP-996)\nKRaft implements standard Raft leader election with randomized election timeouts (`controller.quorum.election.timeout.ms`, default: 1,000 ms) and heartbeats (`controller.quorum.fetch.timeout.ms`, default: 2,000 ms).\n- **Pre-Vote Protocol (KIP-996):** Before a candidate controller increments its term and solicits votes, it broadcasts a Pre-Vote request. Peers only grant pre-votes if they have not heard from the active leader for longer than the election timeout. This prevents network-partitioned or isolated nodes with stale terms from disrupting an active quorum upon reconnection.\n\n## 5. Key KRaft Configuration Parameters\n- `process.roles`: Node role (`broker`, `controller`, or `broker,controller`).\n- `node.id`: Unique non-negative integer ID identifying the node in the quorum.\n- `controller.quorum.voters`: Comma-separated list of controller voters in the format `<node_id>@<host>:<port>`. Example: `1@controller1:9093,2@controller2:9093,3@controller3:9093`.\n- `controller.listener.names`: Listener name used by controllers for Raft quorum RPCs (e.g., `CONTROLLER`).\n- `metadata.log.dir`: Local directory where the `@metadata` partition log and snapshot checkpoints are stored.",
+    "chunk_index": 1,
+    "source_url": "https://kafka.apache.org/documentation/#kraft",
+    "doc_type": "core_docs",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "doc-log-compaction_chunk_00",
+    "doc_id": "doc-log-compaction",
+    "title": "Log Compaction Internals, Cleaner Threads, and Deduplication",
+    "text": "# Log Compaction Internals, Cleaner Threads, and Deduplication\n\n## 1. Log Compaction Overview\nLog compaction is a record retention mechanism where Kafka retains at least the latest known value for each message key within a topic partition log. Instead of discarding records strictly by time or size, compaction preserves the most recent state for each key, providing fine-grained record retention rather than coarse time-based deletion.\n\nCompaction is essential for:\n- Reconstructing stateful caches on restart (e.g., Kafka Streams RocksDB changelogs).\n- Managing cluster metadata (`__consumer_offsets` and `@metadata` topics).\n- Key-value event-sourcing architectures.\n\n## 2. Clean Head vs. Dirty Tail Mechanics\nA compacted partition log is divided into two distinct regions:\n1. **Clean Head:** The portion of the log that has already been compacted. All keys in the clean head are guaranteed to be unique.\n2. **Dirty Tail:** The newly appended segments containing uncompacted records, potentially containing multiple duplicate updates for the same key.\n3. **Active Segment:** The currently open segment receiving new writes. The active segment is never compacted until rolled over.\n\n## 3. The Cleaner Thread Algorithm\nBackground log cleaner threads (`log.cleaner.threads`) execute the compaction process:\n1. **Selection:** The cleaner identifies partition logs where the dirty ratio exceeds `min.cleanable.dirty.ratio` (default `0.5` or 50% dirty data).\n2. **Phase 1 (Offset Map Build):** The cleaner reads through the dirty tail and builds an in-memory hash table (the *SkimpyOffsetMap*). It maps each 8-byte MD5 key hash to its latest 8-byte logical offset in the dirty tail.\n3. **Phase 2 (Log Rewrite):** The cleaner reads both the clean head and dirty tail from beginning to end. For each record:\n   - It checks if the record's offset is greater than or equal to the offset in the `SkimpyOffsetMap`.\n   - If yes, the record is the latest version and is copied to a new replacement clean segment.\n   - If no, a newer version of this key exists later in the log, so the old record is discarded.\n4. **Swap:** The replacement cleaned segment is swapped atomically into place, and the old uncompacted segments are deleted.\n\n## 4. Deletes and Tombstones\nTo delete",
+    "chunk_index": 0,
+    "source_url": "https://kafka.apache.org/documentation/#compaction",
+    "doc_type": "core_docs",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "doc-log-compaction_chunk_01",
+    "doc_id": "doc-log-compaction",
+    "title": "Log Compaction Internals, Cleaner Threads, and Deduplication",
+    "text": "key exists later in the log, so the old record is discarded.\n4. **Swap:** The replacement cleaned segment is swapped atomically into place, and the old uncompacted segments are deleted.\n\n## 4. Deletes and Tombstones\nTo delete a key in a compacted topic, a producer writes a record with the target key and a `null` payload, known as a **Tombstone**:\n- The tombstone acts as a deletion marker.\n- Consumers reading the tombstone recognize that the key has been deleted and remove it from their local state stores.\n- The cleaner preserves the tombstone across compactions until `delete.retention.ms` (default: 86,400,000 ms / 24 hours) elapses. This ensures all consumer groups have sufficient time to observe the deletion before the tombstone is permanently garbage-collected from disk.\n\n## 5. Key Configuration Properties\n- `log.cleanup.policy`: Set to `compact` or `compact,delete` (combined compaction and time-based retention).\n- `min.cleanable.dirty.ratio`: Default `0.5`. Lower values compact more aggressively at the cost of higher I/O; higher values reduce I/O but increase disk space usage.\n- `log.cleaner.threads`: Number of background threads dedicated to log cleaning (default: 1).\n- `log.cleaner.dedupe.buffer.size`: Total memory allocated across all cleaner threads for offset maps (default: 134,217,728 bytes / 128 MB).\n- `delete.retention.ms`: Time to retain deletion tombstones (default: 24 hours).\n- `min.compaction.lag.ms`: Minimum time a message remains uncompacted in the dirty tail (default: 0).\n- `max.compaction.lag.ms`: Maximum time a message can remain uncompacted in the dirty tail (default: Long.MAX_VALUE).",
+    "chunk_index": 1,
+    "source_url": "https://kafka.apache.org/documentation/#compaction",
+    "doc_type": "core_docs",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "doc-transactions-eos_chunk_00",
+    "doc_id": "doc-transactions-eos",
+    "title": "Exactly-Once Semantics, Idempotent Producers, and Two-Phase Commit",
+    "text": "# Exactly-Once Semantics, Idempotent Producers, and Two-Phase Commit\n\n## 1. Exactly-Once Semantics (EOS) Overview\nApache Kafka delivers end-to-end Exactly-Once Semantics (EOS) across consume-process-produce streaming applications. EOS guarantees that each incoming record is processed exactly once, and output records along with consumer offsets are committed atomically across multiple topic partitions.\n\nEOS is built on two core mechanisms:\n1. **Idempotent Producers:** Guarantees zero duplicate writes and strict per-partition message ordering, even across network retries.\n2. **Transactional Messaging:** Guarantees atomic multi-partition writes using a two-phase commit protocol coordinated by the Transaction Coordinator.\n\n## 2. Idempotent Producer Mechanics\nEnabled by default via `enable.idempotence=true` (since Kafka 3.0):\n1. **Producer ID (`PID`):** On startup, the producer sends an `InitProducerId` request to the broker. The broker assigns a globally unique 64-bit Producer ID (`PID`) and initializes `producer_epoch = 0`.\n2. **Sequence Numbers:** For each topic partition, the producer assigns monotonically increasing 32-bit sequence numbers (`0, 1, 2...`) to every record batch.\n3. **Broker Deduplication:** The partition leader maintains an in-memory cache of the latest 5 sequence numbers received from each `PID`. If a producer retries a produce request due to a transient network error, the broker inspects the sequence number:\n   - If `sequence_number == expected_sequence`: The broker accepts and appends the batch.\n   - If `sequence_number <= last_seen_sequence`: The broker recognizes a duplicate retry, acknowledges it with `SUCCESS`, but skips writing it to disk.\n   - If `sequence_number > expected_sequence + 1`: The broker detects an out-of-order gap and throws an `OutOfOrderSequenceException`.\n\n## 3. Transaction Coordinator & The `__transaction_state` Topic\nMulti-partition transactions are managed by the **Transaction Coordinator**, an internal broker component:\n- The coordinator broker is determined by hashing the producer's configured `transactional.id` to a partition of the internal compacted topic `__transaction_state` (`Math.abs(transactional_id.hashCode()) % num_partitions`).\n- The `__transaction_state` topic persists the lifecycle state machine of each transaction: `Empty` -> `Ongoing` -> `PrepareCommit` / `",
+    "chunk_index": 0,
+    "source_url": "https://kafka.apache.org/documentation/#semantics",
+    "doc_type": "core_docs",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "doc-transactions-eos_chunk_01",
+    "doc_id": "doc-transactions-eos",
+    "title": "Exactly-Once Semantics, Idempotent Producers, and Two-Phase Commit",
+    "text": "`__transaction_state` (`Math.abs(transactional_id.hashCode()) % num_partitions`).\n- The `__transaction_state` topic persists the lifecycle state machine of each transaction: `Empty` -> `Ongoing` -> `PrepareCommit` / `PrepareAbort` -> `CompleteCommit` / `CompleteAbort`.\n\n## 4. Two-Phase Commit Workflow\nWhen a producer executes a transactional loop:\n1. **`initTransactions()`:** Producer registers `transactional.id` with the coordinator. The coordinator increments `producer_epoch`, fencing any older zombie producer instances sharing the same `transactional.id`.\n2. **`beginTransaction()`:** Producer transitions local state to `Ongoing`.\n3. **`send()` & `AddPartitionsToTxn`:** Before writing to a new partition, the producer registers the topic-partition with the coordinator via `AddPartitionsToTxnRequest`. The coordinator records the partition list in `__transaction_state`. (Optimized server-side in KIP-892).\n4. **Produce Records:** Producer sends data record batches with `isTransactional=true`, `PID`, and `producer_epoch` to partition leader brokers.\n5. **`sendOffsetsToTransaction()`:** Producer sends committed consumer offsets to the coordinator via `AddOffsetsToTxnRequest` and `TxnOffsetCommitRequest`, linking consumer offsets directly to the active transaction.\n6. **`commitTransaction()` (Two-Phase Commit):**\n   - **Phase 1 (Prepare):** Coordinator writes a `PREPARE_COMMIT` record to `__transaction_state`. Once replicated, the commit is legally binding.\n   - **Phase 2 (Control Markers):** Coordinator broadcasts `WriteTxnMarkersRequest` to all partition leader brokers touched by the transaction. Each leader appends a special control batch (`COMMIT` or `ABORT` marker) to its partition log.\n   - **Finalization:** Coordinator writes a `COMPLETE_COMMIT` record to `__transaction_state` and returns `SUCCESS` to the producer.\n\n## 5. Consumer Isolation Levels\nConsumers control how they view transactional records via `isolation.level`:\n- **`read_uncommitted` (Default):** Returns all messages in offset order, including uncommitted messages and records from aborted transactions.\n- **`read_committed`:** Filters out all aborted transaction records. The consumer reads only up to the **Last Stable Offset (LSO)**\u2014the",
+    "chunk_index": 1,
+    "source_url": "https://kafka.apache.org/documentation/#semantics",
+    "doc_type": "core_docs",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "doc-transactions-eos_chunk_02",
+    "doc_id": "doc-transactions-eos",
+    "title": "Exactly-Once Semantics, Idempotent Producers, and Two-Phase Commit",
+    "text": "** Returns all messages in offset order, including uncommitted messages and records from aborted transactions.\n- **`read_committed`:** Filters out all aborted transaction records. The consumer reads only up to the **Last Stable Offset (LSO)**\u2014the offset of the first unresolved ongoing transaction. If a transaction is ongoing, `read_committed` consumers pause at the LSO until the transaction commits or aborts.",
+    "chunk_index": 2,
+    "source_url": "https://kafka.apache.org/documentation/#semantics",
+    "doc_type": "core_docs",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-1018_chunk_00",
+    "doc_id": "kip-1018",
+    "title": "KIP-1018: Ephemeral Topics Support in KRaft",
+    "text": "# KIP-1018: Ephemeral Topics Support in KRaft\n\n## KIP-1018: Ephemeral Topics Support in KRaft\n\n### Summary\nAdded session-scoped ephemeral topics that are automatically garbage-collected by the KRaft controller when the creating client session expires.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-1018%3A+Ephemeral+topics",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-182_chunk_00",
+    "doc_id": "kip-182",
+    "title": "KIP-182: Kafka Streams API Enhancement",
+    "text": "# KIP-182: Kafka Streams API Enhancement\n\n## KIP-182: Kafka Streams API Enhancements\n\n### Summary\nStandardized the high-level Streams DSL with type-safe `KStream`, `KTable`, `GlobalKTable`, windowed joins, and state store aggregations backed by RocksDB changelog topics.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-182%3A+Provide+join+and+aggregate+operations+for+Kafka+Streams",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-382_chunk_00",
+    "doc_id": "kip-382",
+    "title": "KIP-382: MirrorMaker 2.0 Multi-cluster cross-datacenter replication",
+    "text": "# KIP-382: MirrorMaker 2.0 Multi-cluster cross-datacenter replication\n\n## KIP-382: MirrorMaker 2.0 Multi-Cluster Replication\n\n### Summary\nRebuilt cross-datacenter multi-cluster replication on Kafka Connect architecture, adding automatic topic synchronization, consumer offset translation (`checkpoint` topic), and cycle detection.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-382%3A+MirrorMaker+2.0",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-405_chunk_00",
+    "doc_id": "kip-405",
+    "title": "KIP-405: Kafka Tiered Storage",
+    "text": "# KIP-405: Kafka Tiered Storage\n\n## KIP-405: Kafka Tiered Storage\n\n### Motivation & Problem Statement\nStoring large volumes of historical data on local NVMe/SSD broker disks is cost-prohibitive and couples storage capacity directly to broker compute capacity. Scaling storage historically required adding broker nodes and triggering expensive partition reassignments.\n\n### Architectural Architecture\nTiered Storage separates local broker storage from remote object storage (e.g. S3, GCS, Azure Blob):\n- **Local Tier:** The active segment and recent inactive segments remain on local broker disks for low-latency writes and real-time tail consumers.\n- **Remote Tier:** Closed, inactive log segments are uploaded asynchronously to cloud object storage by the `RemoteLogManager` (`RLM`).\n- **Transparent Consumer Reads:** Clients use standard `Fetch` requests. When fetching older offsets, the broker streams segments transparently from remote storage, caching frequently read chunks in a local disk chunk cache.\n- **Cost Reduction:** Enables multi-month or infinite topic retention at a fraction of disk cost without adding broker nodes.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-405%3A+Kafka+Tiered+Storage",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-447_chunk_00",
+    "doc_id": "kip-447",
+    "title": "KIP-447: Producer Scalability for Exactly-Once Semantics",
+    "text": "# KIP-447: Producer Scalability for Exactly-Once Semantics\n\n## KIP-447: Producer Scalability for Exactly-Once Semantics\n\n### Summary\nAllowed a single transactional producer instance to commit transactions across multiple consumer group partitions simultaneously, reducing connection and thread overhead in Kafka Streams.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-447%3A+Producer+scalability+for+exactly-once+semantics",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-500_chunk_00",
+    "doc_id": "kip-500",
+    "title": "KIP-500: Replace ZooKeeper with a Self-Managed Metadata Quorum (KRaft)",
+    "text": "# KIP-500: Replace ZooKeeper with a Self-Managed Metadata Quorum (KRaft)\n\n## KIP-500: Replace ZooKeeper with a Self-Managed Metadata Quorum\n\n### Motivation & Problem Statement\nPrior to KIP-500, Apache Kafka stored cluster metadata (broker registrations, topic partitions, ISR lists, dynamic configs, ACLs) in external Apache ZooKeeper ensembles. This architecture suffered from fundamental limitations:\n1. **Metadata Loading Bottleneck:** On controller failover, the new controller had to synchronously read the entire ZooKeeper tree into JVM heap memory, causing multi-minute failover pauses on clusters with over 100,000 partitions.\n2. **Metadata Desynchronization:** ZooKeeper updates were propagated to brokers via `LeaderAndIsr` and `UpdateMetadata` RPCs sent concurrently, leading to temporary metadata divergence across brokers.\n3. **Operational Complexity:** Managing two distinct distributed systems (ZooKeeper + Kafka) required separate monitoring, tuning, security policies, and deployment overhead.\n\n### Architectural Solution\nKIP-500 replaces ZooKeeper with an internal Raft consensus engine (KRaft) operating within Kafka controller nodes:\n- **Metadata as an Event Log:** Cluster metadata is modeled as a replicated append-only event log stored on partition 0 of the internal `@metadata` topic.\n- **Active Controller & Standby Quorum:** One controller is elected active leader via Raft; other controllers act as standby followers replicating the `@metadata` log via standard `Fetch` and `FetchSnapshot` RPCs.\n- **Asynchronous Broker Caching:** Regular brokers continuously tail the `@metadata` log and update a local in-memory metadata image. Sub-second failovers are achieved because standby controllers and brokers already possess the full cluster state.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-500%3A+Replace+ZooKeeper+with+a+Self-Managed+Metadata+Quorum",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-516_chunk_00",
+    "doc_id": "kip-516",
+    "title": "KIP-516: Topic IDs in Kafka Metadata",
+    "text": "# KIP-516: Topic IDs in Kafka Metadata\n\n## KIP-516: Topic IDs in Kafka Metadata\n\n### Summary\nReplaced topic name strings with unique 128-bit UUIDs (`TopicId`) across protocol requests to prevent race conditions when topics are deleted and recreated with identical names.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-516%3A+Topic+IDs",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-584_chunk_00",
+    "doc_id": "kip-584",
+    "title": "KIP-584: Versioning Scheme for Features (Metadata Version)",
+    "text": "# KIP-584: Versioning Scheme for Features (Metadata Version)\n\n## KIP-584: Versioning Scheme for Features (Metadata Version)\n\n### Summary\nImplemented the `metadata.version` feature flag system in KRaft, enabling zero-downtime rolling upgrades and programmatic feature gating across Kafka versions.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-584%3A+Versioning+scheme+for+features",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-679_chunk_00",
+    "doc_id": "kip-679",
+    "title": "KIP-679: Producer ID generation and idempotent producer semantics",
+    "text": "# KIP-679: Producer ID generation and idempotent producer semantics\n\n## KIP-679: Producer ID Generation Improvements\n\n### Summary\nHardened producer ID generation and sequence number recovery across broker restarts without allocating new PIDs or breaking idempotent deduplication guarantees.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-679%3A+Producer+ID+generation",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-704_chunk_00",
+    "doc_id": "kip-704",
+    "title": "KIP-704: Send cluster ID in Fetch and Produce requests",
+    "text": "# KIP-704: Send cluster ID in Fetch and Produce requests\n\n## KIP-704: Send Cluster ID in Fetch and Produce Requests\n\n### Summary\nIncluded cluster ID in client requests to prevent clients from mistakenly reading or writing to the wrong Kafka cluster during DNS failovers.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-704%3A+Send+cluster+ID+in+Fetch+and+Produce+requests",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-793_chunk_00",
+    "doc_id": "kip-793",
+    "title": "KIP-793: Add list consumer groups API",
+    "text": "# KIP-793: Add list consumer groups API\n\n## KIP-793: Add List Consumer Groups API\n\n### Summary\nEnhanced `AdminClient` and Kafka wire protocol with filtered consumer group listings by group state (Empty, Stable, Dead) and group type (classic, consumer, share).",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-793%3A+Add+list+consumer+groups+API",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-833_chunk_00",
+    "doc_id": "kip-833",
+    "title": "KIP-833: Mark KRaft as Production Ready",
+    "text": "# KIP-833: Mark KRaft as Production Ready\n\n## KIP-833: Mark KRaft as Production Ready\n\n### Summary & Impact\nFormally declared KRaft consensus mode production-ready for new clusters in Apache Kafka 3.3+. Validated KRaft metadata quorum stability, snapshot compaction, rolling upgrades, metadata versioning, and operational monitoring metrics.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-833%3A+Mark+KRaft+as+Production+Ready",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-848_chunk_00",
+    "doc_id": "kip-848",
+    "title": "KIP-848: The Next Generation Consumer Rebalance Protocol",
+    "text": "# KIP-848: The Next Generation Consumer Rebalance Protocol\n\n## KIP-848: The Next Generation Consumer Rebalance Protocol\n\n### Motivation & Problem Statement\nThe classic consumer group rebalance protocol (`JoinGroup` and `SyncGroup`) had several architectural flaws:\n1. **Stop-the-World Pauses:** When any single consumer joined, left, or timed out, the entire consumer group was forced into a global rebalance barrier where message consumption halted.\n2. **Client Complexity:** Partition assignors executed in Java client code, making non-Java client implementations (C++, Go, Python, Rust) difficult to keep feature-complete and bug-free.\n3. **Rebalance Storms:** Slow message processing or long garbage collection pauses frequently exceeded `max.poll.interval.ms`, triggering cascading rebalance storms across large consumer fleets.\n\n### Proposed Architecture\nKIP-848 completely redesigns consumer group coordination:\n- **Server-Side Assignment:** Partition assignment computation moves entirely to the broker **Group Coordinator**. Clients become lightweight executors.\n- **Incremental Heartbeat Protocol (`ConsumerGroupHeartbeat`):** Consumers communicate their topic subscriptions and epoch via periodic heartbeat RPCs. The coordinator assigns and revokes partitions incrementally within heartbeat responses.\n- **Elimination of Global Barriers:** Adding or removing a consumer only pauses the specific partitions being transferred; all other consumers continue streaming their assigned partitions uninterrupted.\n- **Configuration:** Enabled on brokers via `group.coordinator.new.enable=true` and on clients via `group.protocol=consumer`.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-848%3A+The+Next+Generation+Consumer+Rebalance+Protocol",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-892_chunk_00",
+    "doc_id": "kip-892",
+    "title": "KIP-892: Transactional Server-Side Verification",
+    "text": "# KIP-892: Transactional Server-Side Verification\n\n## KIP-892: Transactional Server-Side Verification\n\n### Summary\nEliminated client-side `AddPartitionsToTxn` round-trips by verifying partition additions server-side on partition leader brokers, reducing transactional produce latency by 30%.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-892%3A+Transactional+server-side+verification",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-900_chunk_00",
+    "doc_id": "kip-900",
+    "title": "KIP-900: Client side metrics improvements",
+    "text": "# KIP-900: Client side metrics improvements\n\n## KIP-900: Client-Side Metrics Standardization\n\n### Summary\nStandardized telemetry reporter plugins and automated client-side metric collection pushes to brokers via KIP-714 telemetry push endpoints.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-900%3A+Client+side+metrics",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-915_chunk_00",
+    "doc_id": "kip-915",
+    "title": "KIP-915: TxnOffsetCommit with auto-committed offsets",
+    "text": "# KIP-915: TxnOffsetCommit with auto-committed offsets\n\n## KIP-915: TxnOffsetCommit with Auto-Committed Offsets\n\n### Summary\nResolved race conditions between background auto-committed consumer offsets and active transactional offset commits in `KafkaConsumer`.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-915%3A+TxnOffsetCommit+with+auto-committed+offsets",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-932_chunk_00",
+    "doc_id": "kip-932",
+    "title": "KIP-932: Queues for Kafka (Share Groups)",
+    "text": "# KIP-932: Queues for Kafka (Share Groups)\n\n## KIP-932: Queues for Kafka (Share Groups)\n\n### Motivation & Problem Statement\nTraditional Kafka consumer groups enforce partition-level exclusive ownership: a single partition can only be consumed by one consumer in a group at a time. This model presents challenges for traditional point-to-point work queues:\n1. Concurrency is strictly bounded by the number of partitions.\n2. A single slow record blocks all subsequent records in that partition (head-of-line blocking).\n3. Record-level acknowledgement (`ACK`/`REJECT`/`RELEASE`) is unsupported under linear offset commits.\n\n### Architectural Solution: Share Groups\nKIP-932 introduces **Share Groups**, enabling cooperative work-queue consumption from Kafka topics:\n- **Multiple Consumers per Partition:** Multiple consumers in the same Share Group can fetch records concurrently from the *same* partition.\n- **Record-Level Delivery & State:** The broker tracks the state of individual records (`Available`, `Acquired`, `Acknowledged`, `Archived`).\n- **Explicit Record Actions:**\n  - `ACK`: Record processed successfully; marked completed.\n  - `RELEASE`: Processing failed; record immediately made available to other consumers.\n  - `REJECT`: Unprocessable record; moved to dead-letter queue.\n- **Automatic Acquisition Timeout:** If an acquired record is not acknowledged within the acquisition timeout, the broker automatically releases it back to the queue.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-932%3A+Queues+for+Kafka",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-960_chunk_00",
+    "doc_id": "kip-960",
+    "title": "KIP-960: Cooperative rebalancing improvements for Kafka Streams",
+    "text": "# KIP-960: Cooperative rebalancing improvements for Kafka Streams\n\n## KIP-960: Cooperative Rebalancing Improvements for Kafka Streams\n\n### Summary\nOptimized standby task state restoration during cooperative rebalancing in Kafka Streams, minimizing task migration lag.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-960%3A+Cooperative+rebalancing+improvements",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-98_chunk_00",
+    "doc_id": "kip-98",
+    "title": "KIP-98: Exactly Once Delivery and Transactional Messaging",
+    "text": "# KIP-98: Exactly Once Delivery and Transactional Messaging\n\n## KIP-98: Exactly Once Delivery and Transactional Messaging\n\n### Summary & Core Inventions\nThe foundational proposal introducing idempotent producer sequence numbers, multi-partition transactions, the Transaction Coordinator (`__transaction_state`), transaction control markers (`COMMIT`/`ABORT`), and `read_committed` consumer isolation.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-98+-+Exactly+Once+Delivery+and+Transactional+Messaging",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "kip-996_chunk_00",
+    "doc_id": "kip-996",
+    "title": "KIP-996: Pre-Vote in KRaft metadata quorum",
+    "text": "# KIP-996: Pre-Vote in KRaft metadata quorum\n\n## KIP-996: Pre-Vote in KRaft Metadata Quorum\n\n### Summary\nAdded Raft Pre-Vote phase to KRaft leader election. Candidates first ask peers if they would vote for them before incrementing the term, preventing partitioned or isolated nodes from causing leader churn upon reconnection.",
+    "chunk_index": 0,
+    "source_url": "https://cwiki.apache.org/confluence/display/KAFKA/KIP-996%3A+Pre-Vote+in+KRaft",
+    "doc_type": "kip",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "rel-3-8-0_chunk_00",
+    "doc_id": "rel-3-8-0",
+    "title": "Apache Kafka 3.8.0 Release Notes and Feature Overview",
+    "text": "# Apache Kafka 3.8.0 Release Notes and Feature Overview\n\n## 1. Key Highlights in Apache Kafka 3.8.0\n\n### KIP-848 Early Access\nEarly access preview of the Next-Generation Consumer Rebalance Protocol and new Group Coordinator.\n\n### Official Docker Image\nIntroduction of the official Apache Kafka Docker image built on the Apache Software Foundation infrastructure, powered by KRaft.\n\n### ZooKeeper Deprecation Notice\nStartup deprecation warnings emitted on broker startup when running in ZooKeeper mode, urging migration to KRaft.",
+    "chunk_index": 0,
+    "source_url": "https://kafka.apache.org/38/documentation/#relnotes",
+    "doc_type": "release_notes",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "rel-3-9-0_chunk_00",
+    "doc_id": "rel-3-9-0",
+    "title": "Apache Kafka 3.9.0 Release Notes and Upgrade Guide",
+    "text": "# Apache Kafka 3.9.0 Release Notes and Upgrade Guide\n\n## 1. Key Highlights in Apache Kafka 3.9.0\n\n### Final ZooKeeper Bridge Release\nApache Kafka 3.9.0 is the final minor release in the 3.x line. It serves as the bridge release for migrating legacy ZooKeeper clusters to KRaft before upgrading to 4.0.\n\n### KIP-996 KRaft Pre-Vote\nEnabled Raft Pre-Vote by default in KRaft metadata quorums to prevent isolated or partitioned controller nodes from disrupting the active leader.\n\n### KIP-405 Tiered Storage Production Hardening\nAdded chunk cache metrics, enhanced remote storage recovery, and resolved edge-case race conditions in `RemoteLogManager`.",
+    "chunk_index": 0,
+    "source_url": "https://kafka.apache.org/39/documentation/#relnotes",
+    "doc_type": "release_notes",
+    "kafka_version": "4.0"
+  },
+  {
+    "chunk_id": "rel-4-0-0_chunk_00",
+    "doc_id": "rel-4-0-0",
+    "title": "Apache Kafka 4.0.0 Release Notes and Major Milestone Summary",
+    "text": "# Apache Kafka 4.0.0 Release Notes and Major Milestone Summary\n\n## 1. Major Architectural Milestones in Apache Kafka 4.0.0\n\n### Complete Removal of Apache ZooKeeper\nZooKeeper has been completely removed from the Kafka codebase. KRaft mode is now the sole supported metadata and consensus architecture. All legacy ZooKeeper command-line flags (e.g. `--zookeeper`) and ZooKeeper-based broker configurations have been permanently removed.\n\n### KIP-848 General Availability: Next-Gen Consumer Protocol\nThe Next Generation Consumer Rebalance Protocol is now enabled by default (`group.protocol=consumer`). Partition assignment computation has moved to the server-side Group Coordinator, eliminating stop-the-world rebalance barriers and enabling seamless incremental partition assignment.\n\n### KIP-932 Early Access: Queues for Kafka (Share Groups)\nIntroduces Share Groups for point-to-point queue consumption. Multiple consumers can fetch records concurrently from the same partition with individual record-level acknowledgments (`ACK`/`REJECT`/`RELEASE`).\n\n### Java 17 Baseline\nSupport for Java 8 and Java 11 has been removed. All Kafka brokers, Connect workers, MirrorMaker instances, and client libraries now require Java 17 or higher.\n\n### KIP-1018 Ephemeral Topics\nAdded support for session-scoped temporary topics in KRaft mode that are automatically garbage-collected when client sessions terminate.",
+    "chunk_index": 0,
+    "source_url": "https://kafka.apache.org/40/documentation/#relnotes",
+    "doc_type": "release_notes",
+    "kafka_version": "4.0"
+  }
+]

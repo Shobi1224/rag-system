@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "data": [
+    {
+      "subject": "[VOTE] Release Apache Kafka 4.0.0 (RC0)",
+      "date": "2024-09-10",
+      "author": "dev@kafka.apache.org",
+      "snippet": "Official release voting thread for Apache Kafka 4.0.0 highlighting the complete ZooKeeper removal and KIP-848 GA.",
+      "url": "https://lists.apache.org/thread/kafka-4-release-vote"
+    }
+  ]
+}

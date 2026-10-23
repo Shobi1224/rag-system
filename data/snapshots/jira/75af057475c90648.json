@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "data": {
+    "key": "KAFKA-14400",
+    "title": "Fix KRaft cluster metadata quorum state transitions during controller leader failover",
+    "status": "Resolved",
+    "component": "KRaft",
+    "updated": "2024-09-01T12:00:00Z",
+    "snippet": "Addresses race conditions in KRaft active controller leader elections where standby controllers temporarily failed to process metadata snapshots during split-brain recoveries.",
+    "url": "https://issues.apache.org/jira/browse/KAFKA-14400"
+  }
+}

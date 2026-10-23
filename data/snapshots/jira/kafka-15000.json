@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "data": {
+    "key": "KAFKA-15000",
+    "title": "Add client-side telemetry push plugin support for Kafka Java clients",
+    "status": "Resolved",
+    "component": "Clients",
+    "updated": "2024-09-01T12:00:00Z",
+    "snippet": "Implements KIP-714 telemetry push reporter plugins for KafkaProducer and KafkaConsumer to automatically push client performance metrics to broker telemetry endpoints.",
+    "url": "https://issues.apache.org/jira/browse/KAFKA-15000"
+  }
+}

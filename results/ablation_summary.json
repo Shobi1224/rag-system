@@ -1,0 +1,46 @@
+{
+  "V0 (No RAG)": {
+    "static_correctness": 1.0,
+    "live_correctness": 0.0,
+    "refusal_accuracy": 0.2,
+    "overall_correctness": 0.525,
+    "tool_selection_accuracy": "N/A",
+    "latency_p50_ms": 0.0,
+    "latency_p95_ms": 0.0,
+    "tokens_total": 2377,
+    "cost_per_query_usd": 1e-05
+  },
+  "V1 (Baseline RAG)": {
+    "static_correctness": 1.0,
+    "live_correctness": 0.0,
+    "refusal_accuracy": 0.2,
+    "overall_correctness": 0.525,
+    "tool_selection_accuracy": "N/A",
+    "latency_p50_ms": 7.33,
+    "latency_p95_ms": 21.06,
+    "tokens_total": 105252,
+    "cost_per_query_usd": 0.000197
+  },
+  "V2 (Tuned RAG)": {
+    "static_correctness": 1.0,
+    "live_correctness": 0.0,
+    "refusal_accuracy": 0.2,
+    "overall_correctness": 0.525,
+    "tool_selection_accuracy": "N/A",
+    "latency_p50_ms": 872.68,
+    "latency_p95_ms": 1522.11,
+    "tokens_total": 36625,
+    "cost_per_query_usd": 6.9e-05
+  },
+  "V3 (Full Agent)": {
+    "static_correctness": 1.0,
+    "live_correctness": 1.0,
+    "refusal_accuracy": 1.0,
+    "overall_correctness": 1.0,
+    "tool_selection_accuracy": 0.9,
+    "latency_p50_ms": 1200.93,
+    "latency_p95_ms": 2741.37,
+    "tokens_total": 13634,
+    "cost_per_query_usd": 4.1e-05
+  }
+}

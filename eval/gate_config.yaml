@@ -1,0 +1,44 @@
+# ==============================================================================
+# Regression Gate Thresholds Configuration
+# ==============================================================================
+# Slices: static, live, refusal, latency, cost
+# Thresholds represent maximum acceptable drops (or max percentage increases)
+
+version: 1.0
+trusted_metrics:
+  - static_correctness
+  - live_correctness
+  - refusal_rate
+  - recall_at_5
+  - faithfulness
+  - latency_p95
+  - cost_per_query
+
+thresholds:
+  static_correctness:
+    max_drop: 0.05       # Max 5% drop
+    description: "Evaluated over 20 static docs questions"
+  
+  live_correctness:
+    max_drop: 0.05       # Max 5% drop on Jira and mailing list questions
+    description: "Evaluated over 15 live tool questions"
+
+  refusal_rate:
+    max_drop: 0.00       # Zero tolerance for refusal leakage
+    description: "Evaluated over 5 out-of-scope guardrail questions"
+
+  recall_at_5:
+    max_drop: 0.10       # Max 10% drop in retrieval recall
+    description: "Chunk retrieval recall"
+
+  faithfulness:
+    max_drop: 0.05       # Max 5% drop in context grounding
+    description: "LLM judge faithfulness"
+
+  latency_p95_ms:
+    max_increase_pct: 35.0  # Max 35% latency regression
+    description: "95th percentile latency"
+
+  cost_per_query_usd:
+    max_increase_pct: 50.0  # Max 50% budget cost increase
+    description: "Average query cost in USD"

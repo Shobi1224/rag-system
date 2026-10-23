@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "data": {
+    "key": "KAFKA-14000",
+    "title": "Support dynamic SSL keystore and truststore reload without broker restart",
+    "status": "Resolved",
+    "component": "Security",
+    "updated": "2024-09-01T12:00:00Z",
+    "snippet": "Enables dynamic reconfiguration of SSL certificates and keys on active broker listeners via IncrementalAlterConfigs API without dropping active client connections.",
+    "url": "https://issues.apache.org/jira/browse/KAFKA-14000"
+  }
+}

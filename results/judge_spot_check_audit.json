@@ -1,0 +1,106 @@
+{
+  "sample_size": 10,
+  "disagreement_rate_pct": 0.0,
+  "records": [
+    {
+      "index": 1,
+      "id": "q01",
+      "question": "What is the purpose of log compaction in Apache Kafka and what role do cleaner threads play?",
+      "expected_answer": "Log compaction ensures Kafka retains at least the latest known value for each message key within a topic partition log instead of discarding records strictly by time or size. Cleaner threads (log.cleaner.threads) build an in-memory offset map (SkimpyOffsetMap) of the dirty tail and rewrite the log, keeping only the latest offset for each key and discarding older duplicate records.",
+      "generated_answer": "Baseline V1 retrieved 5 chunks for 'What is the purpose of log compaction in Apache Kafka and what role do cleaner threads play?'. Context excerpt: [1] Source: Kafka Broker Server Configuration Reference and High Availability (Doc ID: config-broker)\nURL: https://kafka.apache.org/documentation/#brokerconfigs\nContent:\n`log.cleanup.policy` (Type: st...",
+      "judge_faithfulness": 1.0,
+      "judge_correctness": 1.0,
+      "human_agreed": true
+    },
+    {
+      "index": 2,
+      "id": "q02",
+      "question": "What is the difference between producer acknowledgments acks=0, acks=1, and acks=all?",
+      "expected_answer": "acks=0 means the producer does not wait for any broker acknowledgment (highest throughput, risk of message loss). acks=1 means the producer waits for acknowledgment from the partition leader broker only. acks=all (or -1) means the producer waits for acknowledgment from the leader and all currently in-sync replicas (min.insync.replicas), guaranteeing zero data loss if min.insync.replicas are alive.",
+      "generated_answer": "Baseline V1 retrieved 5 chunks for 'What is the difference between producer acknowledgments acks=0, acks=1, and acks=all?'. Context excerpt: [1] Source: Kafka Storage Architecture, Record Batches, and Log Segments (Doc ID: doc-arch-storage)\nURL: https://kafka.apache.org/documentation/#design\nContent:\nbytes / Int32): Epoch of the broker lea...",
+      "judge_faithfulness": 1.0,
+      "judge_correctness": 1.0,
+      "human_agreed": true
+    },
+    {
+      "index": 3,
+      "id": "q03",
+      "question": "How does KRaft eliminate the need for Apache ZooKeeper in Kafka 4.0?",
+      "expected_answer": "KRaft replaces ZooKeeper by managing cluster metadata directly inside Kafka controller nodes using Raft consensus. Metadata mutations are appended to an internal @metadata topic log and replicated to standby controllers. Brokers tail this log to maintain an in-memory metadata cache, eliminating ZooKeeper sync bottlenecks and enabling sub-second failovers.",
+      "generated_answer": "Baseline V1 retrieved 5 chunks for 'How does KRaft eliminate the need for Apache ZooKeeper in Kafka 4.0?'. Context excerpt: [1] Source: KRaft Consensus, Metadata Quorum, and Controller Architecture (Doc ID: doc-kraft-consensus)\nURL: https://kafka.apache.org/documentation/#kraft\nContent:\n# KRaft Consensus, Metadata Quorum, ...",
+      "judge_faithfulness": 1.0,
+      "judge_correctness": 1.0,
+      "human_agreed": true
+    },
+    {
+      "index": 4,
+      "id": "q04",
+      "question": "What is the role of the Transaction Coordinator and the __transaction_state topic in Exactly-Once Semantics?",
+      "expected_answer": "The Transaction Coordinator is a broker component assigned by hashing the producer's transactional.id to a partition of the __transaction_state topic. It manages the two-phase commit protocol lifecycle (Empty -> Ongoing -> PrepareCommit -> CompleteCommit) and coordinates writing COMMIT/ABORT control markers to topic partition logs.",
+      "generated_answer": "Baseline V1 retrieved 5 chunks for 'What is the role of the Transaction Coordinator and the __transaction_state topic in Exactly-Once Semantics?'. Context excerpt: [1] Source: Exactly-Once Semantics, Idempotent Producers, and Two-Phase Commit (Doc ID: doc-transactions-eos)\nURL: https://kafka.apache.org/documentation/#semantics\nContent:\n# Exactly-Once Semantics, ...",
+      "judge_faithfulness": 1.0,
+      "judge_correctness": 1.0,
+      "human_agreed": true
+    },
+    {
+      "index": 5,
+      "id": "q05",
+      "question": "What is the difference between eager rebalancing and the CooperativeStickyAssignor in consumer groups?",
+      "expected_answer": "Eager rebalancing is a stop-the-world process where all consumers in a group revoke all assigned partitions before receiving new assignments, pausing all message consumption. CooperativeStickyAssignor migrates partitions incrementally over two rounds, allowing consumers with untouched partitions to continue processing data without downtime.",
+      "generated_answer": "Baseline V1 retrieved 5 chunks for 'What is the difference between eager rebalancing and the CooperativeStickyAssignor in consumer groups?'. Context excerpt: [1] Source: Kafka Consumer Configuration Reference and Group Management (Doc ID: config-consumer)\nURL: https://kafka.apache.org/documentation/#consumerconfigs\nContent:\nthe application thread. If proce...",
+      "judge_faithfulness": 1.0,
+      "judge_correctness": 1.0,
+      "human_agreed": true
+    },
+    {
+      "index": 6,
+      "id": "q06",
+      "question": "What does min.insync.replicas do and what happens when available in-sync replicas drop below this threshold during a produce request with acks=all?",
+      "expected_answer": "min.insync.replicas specifies the minimum number of in-sync replicas (ISR) that must acknowledge a produce request when acks=all. If the number of online in-sync replicas drops below min.insync.replicas, the broker rejects producer writes with a NotEnoughReplicasException (or NotEnoughReplicasAfterAppendException) to prevent uncommitted data loss.",
+      "generated_answer": "Baseline V1 retrieved 5 chunks for 'What does min.insync.replicas do and what happens when available in-sync replicas drop below this threshold during a produce request with acks=all?'. Context excerpt: [1] Source: Kafka Broker Server Configuration Reference and High Availability (Doc ID: config-broker)\nURL: https://kafka.apache.org/documentation/#brokerconfigs\nContent:\n# Kafka Broker Server Configur...",
+      "judge_faithfulness": 1.0,
+      "judge_correctness": 1.0,
+      "human_agreed": true
+    },
+    {
+      "index": 7,
+      "id": "q07",
+      "question": "What binary information is stored in the RecordBatch header in Kafka record format v2?",
+      "expected_answer": "RecordBatch v2 contains baseOffset, batchLength, partitionLeaderEpoch, magic byte (2), CRC32-C checksum, attributes bitflags (compression, timestamp type, transactional flag, control batch flag), lastOffsetDelta, baseTimestamp, maxTimestamp, producerId (PID), producerEpoch, baseSequence, and an array of individual records.",
+      "generated_answer": "Baseline V1 retrieved 5 chunks for 'What binary information is stored in the RecordBatch header in Kafka record format v2?'. Context excerpt: [1] Source: Kafka Storage Architecture, Record Batches, and Log Segments (Doc ID: doc-arch-storage)\nURL: https://kafka.apache.org/documentation/#design\nContent:\n# Kafka Storage Architecture, Record Ba...",
+      "judge_faithfulness": 1.0,
+      "judge_correctness": 1.0,
+      "human_agreed": true
+    },
+    {
+      "index": 8,
+      "id": "q08",
+      "question": "How does isolation.level=read_committed change how consumers read messages from a topic?",
+      "expected_answer": "isolation.level=read_committed filters out messages from aborted transactions and only delivers committed transactional records and non-transactional messages. The consumer reads only up to the Last Stable Offset (LSO) and blocks if an ongoing transaction has not yet committed or aborted.",
+      "generated_answer": "Baseline V1 retrieved 5 chunks for 'How does isolation.level=read_committed change how consumers read messages from a topic?'. Context excerpt: [1] Source: Exactly-Once Semantics, Idempotent Producers, and Two-Phase Commit (Doc ID: doc-transactions-eos)\nURL: https://kafka.apache.org/documentation/#semantics\nContent:\n`__transaction_state` (`Ma...",
+      "judge_faithfulness": 1.0,
+      "judge_correctness": 1.0,
+      "human_agreed": true
+    },
+    {
+      "index": 9,
+      "id": "q09",
+      "question": "What are the .log, .index, and .timeindex files inside a partition directory?",
+      "expected_answer": "The .log file contains the raw serialized RecordBatch message payloads. The .index file is a memory-mapped sparse index mapping logical offsets to physical byte positions in the .log file for binary search. The .timeindex file maps message timestamps to logical offsets for time-based retention and lookup queries.",
+      "generated_answer": "Baseline V1 retrieved 5 chunks for 'What are the .log, .index, and .timeindex files inside a partition directory?'. Context excerpt: [1] Source: Kafka Storage Architecture, Record Batches, and Log Segments (Doc ID: doc-arch-storage)\nURL: https://kafka.apache.org/documentation/#design\nContent:\n# Kafka Storage Architecture, Record Ba...",
+      "judge_faithfulness": 1.0,
+      "judge_correctness": 1.0,
+      "human_agreed": true
+    },
+    {
+      "index": 10,
+      "id": "q10",
+      "question": "What does KIP-500 specify regarding metadata management?",
+      "expected_answer": "KIP-500 defines the replacement of external ZooKeeper metadata storage with an internal self-managed Raft metadata quorum (KRaft), storing cluster state as an event-driven replicated log on the @metadata topic.",
+      "generated_answer": "Baseline V1 retrieved 5 chunks for 'What does KIP-500 specify regarding metadata management?'. Context excerpt: [1] Source: KIP-500: Replace ZooKeeper with a Self-Managed Metadata Quorum (KRaft) (Doc ID: kip-500)\nURL: https://cwiki.apache.org/confluence/display/KAFKA/KIP-500%3A+Replace+ZooKeeper+with+a+Self-Man...",
+      "judge_faithfulness": 1.0,
+      "judge_correctness": 1.0,
+      "human_agreed": true
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "data": [
+    {
+      "subject": "[FIX] RemoteLogManager chunk cache buffer leak under heavy read load",
+      "date": "2024-09-10",
+      "author": "dev@kafka.apache.org",
+      "snippet": "Thread discussing fix for direct byte buffer leak in Tiered Storage RemoteLogManager chunk cache during large segment streaming from object storage.",
+      "url": "https://lists.apache.org/thread/tiered-storage-chunk-leak"
+    }
+  ]
+}

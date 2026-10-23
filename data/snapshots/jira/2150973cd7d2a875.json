@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "data": [
+    {
+      "key": "KAFKA-SEARCH-1",
+      "title": "CooperativeStickyAssignor partition oscillation during consumer rolling restarts",
+      "status": "Resolved",
+      "component": "Consumer",
+      "updated": "2024-09-01T12:00:00Z",
+      "snippet": "Fixed bug where consumers in cooperative rebalance repeatedly revoked and re-assigned identical partition sets when members had uneven subscription generation IDs.",
+      "url": "https://issues.apache.org/jira/browse/KAFKA-13420"
+    }
+  ]
+}

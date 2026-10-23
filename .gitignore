@@ -1,0 +1,28 @@
+# Secrets / environment
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Node / NestJS
+node_modules/
+dist/
+*.tsbuildinfo
+npm-debug.log*
+
+# Vector DB storage (regenerate with index/build_index.py)
+data/qdrant_storage/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

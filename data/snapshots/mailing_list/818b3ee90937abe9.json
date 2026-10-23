@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "data": [
+    {
+      "subject": "[VOTE] KIP-932: Queues for Kafka (Share Groups)",
+      "date": "2024-09-10",
+      "author": "dev@kafka.apache.org",
+      "snippet": "Community voting thread adopting KIP-932 for point-to-point share group queue consumption in Kafka.",
+      "url": "https://lists.apache.org/thread/kip-932-vote-thread"
+    }
+  ]
+}

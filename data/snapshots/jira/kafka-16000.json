@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "data": {
+    "key": "KAFKA-16000",
+    "title": "Remove ZooKeeper dependencies and command line tools for Apache Kafka 4.0",
+    "status": "Resolved",
+    "component": "Core",
+    "updated": "2024-09-01T12:00:00Z",
+    "snippet": "Completed the full removal of ZooKeeper from Kafka codebase, eliminating --zookeeper flags, zookeeper broker configs, and internal ZK listeners.",
+    "url": "https://issues.apache.org/jira/browse/KAFKA-16000"
+  }
+}

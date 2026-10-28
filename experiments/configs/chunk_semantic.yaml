@@ -1,0 +1,8 @@
+name: chunk-semantic
+description: "Split where consecutive sentences' embeddings diverge (90th percentile distance), max 400 tokens"
+chunker:
+  type: semantic
+  params: {breakpoint_percentile: 90, max_tokens: 400, min_tokens: 40}
+retriever:
+  type: vector
+top_k: 5

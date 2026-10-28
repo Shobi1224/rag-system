@@ -8,7 +8,7 @@ version: 1.0
 trusted_metrics:
   - static_correctness
   - live_correctness
-  - refusal_rate
+  - refusal_accuracy
   - recall_at_5
   - faithfulness
   - latency_p95
@@ -23,7 +23,7 @@ thresholds:
     max_drop: 0.05       # Max 5% drop on Jira and mailing list questions
     description: "Evaluated over 15 live tool questions"
 
-  refusal_rate:
+  refusal_accuracy:
     max_drop: 0.00       # Zero tolerance for refusal leakage
     description: "Evaluated over 5 out-of-scope guardrail questions"
 

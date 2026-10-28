@@ -18,7 +18,9 @@ import time
 import json
 from typing import List, Dict, Any, Optional, TypedDict
 import config
-from rag.v2_tuned_rag import TunedStaticRAG_V2
+from pipeline.rag import RAGPipeline
+from pipeline.settings import PipelineConfig
+from rag.v2_tuning import rewrite_and_extract_query
 from tools.live_tools import get_issue, search_issues, search_threads
 
 try:
@@ -51,7 +53,7 @@ class AgentState(TypedDict):
 
 class KafkaAgentV3:
     def __init__(self):
-        self.v2_rag = TunedStaticRAG_V2(top_k=5)
+        self.retriever = RAGPipeline(PipelineConfig.from_yaml(config.AGENT_PIPELINE_CONFIG))
         self._init_llm()
 
     def _init_llm(self):
@@ -76,7 +78,7 @@ class KafkaAgentV3:
     def query_processing_node(self, state: AgentState) -> AgentState:
         """Expands abbreviations and extracts component targets."""
         query = state["query"]
-        rewritten, filters = self.v2_rag.retrieve(query)[1:]
+        rewritten, _ = rewrite_and_extract_query(query)
         state["rewritten_query"] = rewritten
         return state
 
@@ -117,8 +119,11 @@ class KafkaAgentV3:
 
     @traceable(name="docs_retrieval", project_name="kafka-rag")
     def docs_retrieval_node(self, state: AgentState) -> AgentState:
-        """Executes V2 Tuned static retrieval."""
-        chunks, _, _ = self.v2_rag.retrieve(state["rewritten_query"])
+        """Retrieves documentation chunks through the config-driven pipeline (see config.AGENT_PIPELINE_CONFIG)."""
+        chunks = [
+            {**d["metadata"], "text": d["page_content"]}
+            for d in self.retriever.retrieve(state["rewritten_query"])
+        ]
         state["retrieved_docs"] = chunks
         for ch in chunks:
             state["citations"].append({

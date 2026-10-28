@@ -1,0 +1,8 @@
+name: chunk-fixed-200
+description: "Fixed 200-token windows, 20 overlap (same size class as the structured chunkers)"
+chunker:
+  type: fixed
+  params: {chunk_size: 200, chunk_overlap: 20}
+retriever:
+  type: vector
+top_k: 5

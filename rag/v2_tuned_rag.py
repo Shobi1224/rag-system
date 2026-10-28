@@ -10,6 +10,7 @@ Combines:
 
 import time
 from typing import List, Dict, Any, Tuple
+import numpy as np
 import config
 from rag.v2_tuning import heading_aware_chunking, rewrite_and_extract_query, deduplicate_and_trim_context
 from index.build_index import parse_frontmatter_and_body, load_embedding_model, compute_embeddings
@@ -44,6 +45,11 @@ class TunedStaticRAG_V2:
                 })
         self.bm25 = BM25Searcher(self.all_chunks)
 
+        # Dense vectors for the vector leg of hybrid search (kept in memory: these chunks are not in Qdrant).
+        vectors = np.array(compute_embeddings([c["text"] for c in self.all_chunks], self.model_type, self.model_obj),
+                           dtype=np.float32)
+        self.chunk_vectors = vectors / np.linalg.norm(vectors, axis=1, keepdims=True).clip(min=1e-12)
+
     def _init_llm(self):
         if config.GOOGLE_API_KEY:
             try:
@@ -64,8 +70,10 @@ class TunedStaticRAG_V2:
 
         # 2. Retrieve candidate pool of 20 via BM25 + Vector RRF
         bm25_hits = self.bm25.search(rewritten_q, top_k=20)
-        q_vec = compute_embeddings([rewritten_q], self.model_type, self.model_obj)[0]
-        fused_hits = reciprocal_rank_fusion(self.all_chunks[:20], bm25_hits, k=60, top_n=20)
+        q_vec = np.array(compute_embeddings([rewritten_q], self.model_type, self.model_obj)[0], dtype=np.float32)
+        q_vec /= max(float(np.linalg.norm(q_vec)), 1e-12)
+        vector_hits = [self.all_chunks[i] for i in np.argsort(self.chunk_vectors @ q_vec)[::-1][:20]]
+        fused_hits = reciprocal_rank_fusion(vector_hits, bm25_hits, k=60, top_n=20)
 
         # 3. Apply metadata filters if present
         if filters.get("doc_type"):

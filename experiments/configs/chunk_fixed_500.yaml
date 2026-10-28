@@ -1,0 +1,8 @@
+name: chunk-fixed-500
+description: "Fixed 500-token windows, 50 overlap (the original V1 chunking)"
+chunker:
+  type: fixed
+  params: {chunk_size: 500, chunk_overlap: 50}
+retriever:
+  type: vector
+top_k: 5

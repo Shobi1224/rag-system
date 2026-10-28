@@ -48,11 +48,11 @@ class BaselineStaticRAG:
 
         if self.qdrant_client:
             try:
-                results = self.qdrant_client.search(
+                results = self.qdrant_client.query_points(
                     collection_name=config.QDRANT_COLLECTION,
-                    query_vector=query_vec,
+                    query=query_vec,
                     limit=self.top_k
-                )
+                ).points
                 chunks = []
                 for r in results:
                     p = r.payload or {}

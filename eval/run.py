@@ -68,6 +68,7 @@ def run_evaluation(
     mrrs = []
     faithfulness_scores = []
     correctness_scores = []
+    unjudged = []
     latencies = []
     total_tokens = 0
     total_cost = 0.0
@@ -146,11 +147,15 @@ def run_evaluation(
         # Generation scoring
         context_str = "\n".join([c.get("snippet", "") for c in citations if c.get("snippet")])
         eval_res = evaluate_faithfulness_and_correctness(q_text, context_str, ans, exp_ans)
-        faithfulness_scores.append(eval_res["faithfulness"])
-        correctness_scores.append(eval_res["correctness"])
+        if eval_res["judge_error"]:
+            # Unjudged questions are excluded from the averages, never counted as a pass.
+            unjudged.append({"id": q_id, "judge_error": eval_res["judge_error"]})
+        else:
+            faithfulness_scores.append(eval_res["faithfulness"])
+            correctness_scores.append(eval_res["correctness"])
 
         # Track failure
-        if eval_res["correctness"] < 0.6:
+        if eval_res["correctness"] is not None and eval_res["correctness"] < 0.6:
             failures.append({
                 "id": q_id,
                 "question": q_text,
@@ -164,8 +169,9 @@ def run_evaluation(
     # Summary metrics
     avg_recall = round(float(np.mean(recalls)), 3) if recalls else 0.0
     avg_mrr = round(float(np.mean(mrrs)), 3) if mrrs else 0.0
-    avg_faithfulness = round(float(np.mean(faithfulness_scores)), 3) if faithfulness_scores else 0.0
-    avg_correctness = round(float(np.mean(correctness_scores)), 3) if correctness_scores else 0.0
+    avg_faithfulness = round(float(np.mean(faithfulness_scores)), 3) if faithfulness_scores else None
+    avg_correctness = round(float(np.mean(correctness_scores)), 3) if correctness_scores else None
+    judged_label = f"(judged {len(items) - len(unjudged)}/{len(items)})"
     latency_stats = compute_latency_percentiles(latencies)
     cost_per_q = round(total_cost / len(items), 6) if items else 0.0
 
@@ -174,14 +180,16 @@ def run_evaluation(
     print("-----------------------------------------------------")
     print(f" Recall@5:        {avg_recall}")
     print(f" MRR:             {avg_mrr}")
-    print(f" Faithfulness:    {avg_faithfulness}")
-    print(f" Correctness:     {avg_correctness}")
+    print(f" Faithfulness:    {avg_faithfulness if avg_faithfulness is not None else 'n/a'} {judged_label}")
+    print(f" Correctness:     {avg_correctness if avg_correctness is not None else 'n/a'} {judged_label}")
     print(f" Latency p50:     {latency_stats['p50']} ms")
     print(f" Latency p95:     {latency_stats['p95']} ms")
     print(f" Total Tokens:    {total_tokens}")
     print(f" Avg Cost/Query:  ${cost_per_q}")
     print(f" Failures (<0.6): {len(failures)}")
     print("-----------------------------------------------------")
+    if unjudged:
+        print(f" [WARN] {len(unjudged)} question(s) were not judged; first reason: {unjudged[0]['judge_error']}")
 
     # Write to experiments.csv
     row = {
@@ -196,7 +204,7 @@ def run_evaluation(
         "Latency_p95": latency_stats["p95"],
         "Tokens": total_tokens,
         "Cost_per_query": cost_per_q,
-        "notes": f"{len(failures)} failures recorded"
+        "notes": f"{len(failures)} failures recorded; {len(unjudged)} unjudged"
     }
 
     df_row = pd.DataFrame([row])
@@ -212,6 +220,8 @@ def run_evaluation(
     # Save failures analysis
     with open(out_dir / "failures.json", "w", encoding="utf-8") as f:
         json.dump(failures, f, indent=2)
+    with open(out_dir / "unjudged.json", "w", encoding="utf-8") as f:
+        json.dump(unjudged, f, indent=2)
 
     print(f"\n[OK] Logged baseline row to: {config.EXPERIMENTS_FILE.relative_to(BASE_DIR)}")
     print(f"[OK] Saved failure details to: {out_dir.relative_to(BASE_DIR) / 'failures.json'}\n")

@@ -20,6 +20,7 @@ npm-debug.log*
 
 # Vector DB storage (regenerate with index/build_index.py)
 data/qdrant_storage/
+data/qdrant_local/
 
 # OS / editor
 .DS_Store

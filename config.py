@@ -25,6 +25,9 @@ GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "sentence-transformers/all-MiniLM-L6-v2")
 EMBEDDING_DIMENSION = 384
 
+# Retrieval pipeline used by the agent (one of the experiment configs; pick the experiment winner)
+AGENT_PIPELINE_CONFIG = BASE_DIR / os.getenv("AGENT_PIPELINE_CONFIG", "experiments/configs/chunk_heading_aware.yaml")
+
 # Vector DB (Qdrant) Settings
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", None)

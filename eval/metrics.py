@@ -1,5 +1,6 @@
 """Evaluation metrics calculations for Retrieval, Generation, and System Performance."""
 
+import re
 import time
 import numpy as np
 from typing import List, Dict, Any, Optional
@@ -37,25 +38,36 @@ def compute_latency_percentiles(latencies_ms: List[float]) -> Dict[str, float]:
     }
 
 
+def _unjudged(reason: str) -> Dict[str, Any]:
+    return {"faithfulness": None, "correctness": None, "judge_error": reason}
+
+
+def _message_text(content: Any) -> str:
+    """Chat model content can be a string or a list of content blocks."""
+    if isinstance(content, str):
+        return content
+    return "".join(b.get("text", "") if isinstance(b, dict) else str(b) for b in content)
+
+
+JUDGE_SCORE_RE = re.compile(r"^\W*(FAITHFULNESS|CORRECTNESS)\W*:[\s*_]*([0-9]*\.?[0-9]+)", re.IGNORECASE)
+
+
 def evaluate_faithfulness_and_correctness(
     question: str,
     context: str,
     answer: str,
     expected_answer: Optional[str] = None
-) -> Dict[str, float]:
-    """Evaluates faithfulness (context grounding) and answer correctness using Gemini judge."""
-    if not config.GOOGLE_API_KEY:
-        return {"faithfulness": 1.0, "correctness": 1.0}
+) -> Dict[str, Any]:
+    """Evaluates faithfulness (context grounding) and answer correctness using Gemini judge.
 
-    try:
-        from langchain_google_genai import ChatGoogleGenerativeAI
-        llm = ChatGoogleGenerativeAI(
-            model=config.GEMINI_MODEL,
-            google_api_key=config.GOOGLE_API_KEY,
-            temperature=0.0
-        )
-        
-        prompt = f"""You are an expert AI evaluator for Apache Kafka documentation RAG systems.
+    Fails closed: if the judge cannot run (no API key, API error) or its reply cannot be
+    parsed, both scores are None and `judge_error` says why. Callers must count these as
+    unjudged, never as a pass.
+    """
+    if not config.GOOGLE_API_KEY:
+        return _unjudged("GOOGLE_API_KEY is not set")
+
+    prompt = f"""You are an expert AI evaluator for Apache Kafka documentation RAG systems.
 Evaluate the following response based on two criteria:
 1. Faithfulness: Is the answer completely grounded in and supported by the Context? (Score 0.0 to 1.0)
 2. Correctness: Does the answer accurately match the Expected Answer and convey the correct facts? (Score 0.0 to 1.0)
@@ -70,24 +82,24 @@ FAITHFULNESS: <score_between_0.0_and_1.0>
 CORRECTNESS: <score_between_0.0_and_1.0>
 REASONING: <brief one sentence reason>
 """
-        res = llm.invoke(prompt).content
-        faithfulness = 1.0
-        correctness = 1.0
-        for line in res.splitlines():
-            if line.startswith("FAITHFULNESS:"):
-                try:
-                    faithfulness = float(line.split(":")[1].strip())
-                except:
-                    pass
-            elif line.startswith("CORRECTNESS:"):
-                try:
-                    correctness = float(line.split(":")[1].strip())
-                except:
-                    pass
-
-        return {
-            "faithfulness": max(0.0, min(1.0, faithfulness)),
-            "correctness": max(0.0, min(1.0, correctness)),
-        }
+    try:
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        llm = ChatGoogleGenerativeAI(
+            model=config.GEMINI_MODEL,
+            google_api_key=config.GOOGLE_API_KEY,
+            temperature=0.0
+        )
+        reply = _message_text(llm.invoke(prompt).content)
     except Exception as e:
-        return {"faithfulness": 1.0, "correctness": 1.0}
+        return _unjudged(f"judge call failed: {type(e).__name__}: {e}")
+
+    scores: Dict[str, float] = {}
+    for line in reply.splitlines():
+        m = JUDGE_SCORE_RE.match(line)
+        if m:
+            scores[m.group(1).lower()] = max(0.0, min(1.0, float(m.group(2))))
+
+    if "faithfulness" not in scores or "correctness" not in scores:
+        return _unjudged(f"unparseable judge reply: {reply[:200]!r}")
+
+    return {"faithfulness": scores["faithfulness"], "correctness": scores["correctness"], "judge_error": None}

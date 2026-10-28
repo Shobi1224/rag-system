@@ -1,0 +1,356 @@
+{
+  "experiment": "chunk-fixed-200-1ee72811",
+  "dataset": "kafka-rag-retrieval-v1",
+  "ran_at": "2026-10-23T07:42:50+00:00",
+  "config": {
+    "name": "chunk-fixed-200",
+    "description": "Fixed 200-token windows, 20 overlap (same size class as the structured chunkers)",
+    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "chunker": {
+      "type": "fixed",
+      "params": {
+        "chunk_size": 200,
+        "chunk_overlap": 20
+      }
+    },
+    "retriever": {
+      "type": "vector",
+      "params": {}
+    },
+    "top_k": 5
+  },
+  "pipeline_stats": {
+    "num_chunks": 69,
+    "avg_chunk_tokens": 150.4,
+    "max_chunk_tokens": 201
+  },
+  "summary": {
+    "doc_recall": 0.95,
+    "doc_mrr": 0.7417,
+    "doc_precision": 0.39,
+    "answer_coverage": 0.8385,
+    "context_tokens": 805.2
+  },
+  "examples": [
+    {
+      "qid": "q09",
+      "question": "What are the .log, .index, and .timeindex files inside a partition directory?",
+      "retrieved": [
+        "doc-arch-storage::001",
+        "doc-log-compaction::001",
+        "doc-arch-storage::005",
+        "doc-log-compaction::000",
+        "doc-log-compaction::003"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 1.0,
+      "doc_precision": 0.4,
+      "answer_coverage": 0.8333,
+      "context_tokens": 861
+    },
+    {
+      "qid": "q19",
+      "question": "What major architectural changes occurred in the Apache Kafka 4.0.0 release?",
+      "retrieved": [
+        "rel-3-8-0::000",
+        "rel-3-9-0::000",
+        "rel-4-0-0::000",
+        "rel-4-0-0::001",
+        "config-consumer::004"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 0.3333333333333333,
+      "doc_precision": 0.4,
+      "answer_coverage": 0.9231,
+      "context_tokens": 749
+    },
+    {
+      "qid": "q07",
+      "question": "What binary information is stored in the RecordBatch header in Kafka record format v2?",
+      "retrieved": [
+        "doc-arch-storage::002",
+        "doc-arch-storage::001",
+        "doc-arch-storage::003",
+        "kip-932::001",
+        "doc-arch-storage::000"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 1.0,
+      "doc_precision": 0.8,
+      "answer_coverage": 0.8966,
+      "context_tokens": 912
+    },
+    {
+      "qid": "q05",
+      "question": "What is the difference between eager rebalancing and the CooperativeStickyAssignor in consumer groups?",
+      "retrieved": [
+        "doc-consumer-rebalance::001",
+        "doc-consumer-rebalance::000",
+        "config-consumer::004",
+        "kip-848::000",
+        "doc-consumer-rebalance::002"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 1.0,
+      "doc_precision": 0.6,
+      "answer_coverage": 0.8438,
+      "context_tokens": 969
+    },
+    {
+      "qid": "q10",
+      "question": "What does KIP-500 specify regarding metadata management?",
+      "retrieved": [
+        "kip-584::000",
+        "kip-500::000",
+        "kip-500::001",
+        "kip-98::000",
+        "kip-516::000"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 0.5,
+      "doc_precision": 0.4,
+      "answer_coverage": 0.76,
+      "context_tokens": 588
+    },
+    {
+      "qid": "q18",
+      "question": "What is the Pre-Vote protocol in KRaft introduced by KIP-996 and what problem does it solve?",
+      "retrieved": [
+        "kip-996::000",
+        "doc-kraft-consensus::003",
+        "kip-1018::000",
+        "kip-833::000",
+        "kip-98::000"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 1.0,
+      "doc_precision": 0.2,
+      "answer_coverage": 0.8571,
+      "context_tokens": 506
+    },
+    {
+      "qid": "q13",
+      "question": "How does Kafka Tiered Storage (KIP-405) separate local tier from remote tier storage?",
+      "retrieved": [
+        "kip-405::000",
+        "kip-405::001",
+        "kip-447::000",
+        "rel-4-0-0::000",
+        "kip-932::000"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 1.0,
+      "doc_precision": 0.4,
+      "answer_coverage": 0.875,
+      "context_tokens": 704
+    },
+    {
+      "qid": "q04",
+      "question": "What is the role of the Transaction Coordinator and the __transaction_state topic in Exactly-Once Semantics?",
+      "retrieved": [
+        "doc-transactions-eos::002",
+        "doc-transactions-eos::004",
+        "doc-transactions-eos::003",
+        "doc-transactions-eos::005",
+        "kip-98::000"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 1.0,
+      "doc_precision": 0.8,
+      "answer_coverage": 0.8333,
+      "context_tokens": 765
+    },
+    {
+      "qid": "q16",
+      "question": "What is the relationship between session.timeout.ms, heartbeat.interval.ms, and max.poll.interval.ms in Kafka consumers?",
+      "retrieved": [
+        "config-consumer::001",
+        "config-consumer::002",
+        "config-producer::003",
+        "rel-4-0-0::001",
+        "config-producer::004"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 1.0,
+      "doc_precision": 0.4,
+      "answer_coverage": 0.871,
+      "context_tokens": 825
+    },
+    {
+      "qid": "q15",
+      "question": "What does unclean.leader.election.enable control and why is it defaulted to false?",
+      "retrieved": [
+        "doc-kraft-consensus::003",
+        "kip-996::000",
+        "config-broker::001",
+        "doc-consumer-rebalance::001",
+        "doc-transactions-eos::003"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 0.3333333333333333,
+      "doc_precision": 0.2,
+      "answer_coverage": 0.6857,
+      "context_tokens": 881
+    },
+    {
+      "qid": "q11",
+      "question": "What major change did KIP-848 introduce to the consumer group protocol?",
+      "retrieved": [
+        "doc-consumer-rebalance::000",
+        "kip-848::000",
+        "kip-793::000",
+        "kip-848::001",
+        "doc-consumer-rebalance::002"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 0.5,
+      "doc_precision": 0.4,
+      "answer_coverage": 0.9375,
+      "context_tokens": 791
+    },
+    {
+      "qid": "q03",
+      "question": "How does KRaft eliminate the need for Apache ZooKeeper in Kafka 4.0?",
+      "retrieved": [
+        "rel-4-0-0::000",
+        "rel-3-9-0::000",
+        "doc-kraft-consensus::000",
+        "rel-3-8-0::000",
+        "kip-500::000"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 0.3333333333333333,
+      "doc_precision": 0.2,
+      "answer_coverage": 0.75,
+      "context_tokens": 871
+    },
+    {
+      "qid": "q17",
+      "question": "How does producer idempotence (enable.idempotence=true) detect and prevent duplicate records on broker restarts?",
+      "retrieved": [
+        "doc-transactions-eos::001",
+        "kip-679::000",
+        "doc-transactions-eos::000",
+        "config-producer::004",
+        "doc-transactions-eos::003"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 1.0,
+      "doc_precision": 0.6,
+      "answer_coverage": 0.7,
+      "context_tokens": 774
+    },
+    {
+      "qid": "q12",
+      "question": "What are Share Groups in KIP-932 and how do they differ from standard consumer groups?",
+      "retrieved": [
+        "doc-consumer-rebalance::000",
+        "kip-793::000",
+        "kip-932::000",
+        "kip-848::001",
+        "kip-848::000"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 0.3333333333333333,
+      "doc_precision": 0.2,
+      "answer_coverage": 0.9429,
+      "context_tokens": 791
+    },
+    {
+      "qid": "q14",
+      "question": "What is the function of delete tombstones in compacted topics and how long are they retained?",
+      "retrieved": [
+        "doc-log-compaction::002",
+        "doc-log-compaction::003",
+        "doc-log-compaction::000",
+        "doc-arch-storage::005",
+        "doc-log-compaction::004"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 1.0,
+      "doc_precision": 0.8,
+      "answer_coverage": 0.7742,
+      "context_tokens": 771
+    },
+    {
+      "qid": "q20",
+      "question": "What does auto.offset.reset do when set to earliest, latest, or none?",
+      "retrieved": [
+        "config-consumer::000",
+        "doc-transactions-eos::005",
+        "kip-915::000",
+        "doc-log-compaction::002",
+        "doc-transactions-eos::001"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 1.0,
+      "doc_precision": 0.2,
+      "answer_coverage": 0.76,
+      "context_tokens": 742
+    },
+    {
+      "qid": "q06",
+      "question": "What does min.insync.replicas do and what happens when available in-sync replicas drop below this threshold during a produce request with acks=all?",
+      "retrieved": [
+        "config-producer::000",
+        "config-broker::000",
+        "config-producer::001",
+        "doc-consumer-rebalance::001",
+        "doc-transactions-eos::001"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 0.5,
+      "doc_precision": 0.2,
+      "answer_coverage": 0.8929,
+      "context_tokens": 1001
+    },
+    {
+      "qid": "q08",
+      "question": "How does isolation.level=read_committed change how consumers read messages from a topic?",
+      "retrieved": [
+        "doc-transactions-eos::004",
+        "doc-transactions-eos::005",
+        "doc-transactions-eos::000",
+        "doc-transactions-eos::003",
+        "doc-transactions-eos::002"
+      ],
+      "doc_recall": 0.0,
+      "doc_mrr": 0.0,
+      "doc_precision": 0.0,
+      "answer_coverage": 0.8462,
+      "context_tokens": 883
+    },
+    {
+      "qid": "q02",
+      "question": "What is the difference between producer acknowledgments acks=0, acks=1, and acks=all?",
+      "retrieved": [
+        "config-producer::000",
+        "kip-679::000",
+        "doc-transactions-eos::004",
+        "doc-transactions-eos::000",
+        "doc-transactions-eos::001"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 1.0,
+      "doc_precision": 0.2,
+      "answer_coverage": 0.8462,
+      "context_tokens": 859
+    },
+    {
+      "qid": "q01",
+      "question": "What is the purpose of log compaction in Apache Kafka and what role do cleaner threads play?",
+      "retrieved": [
+        "doc-log-compaction::000",
+        "config-broker::002",
+        "doc-arch-storage::000",
+        "doc-log-compaction::001",
+        "doc-arch-storage::005"
+      ],
+      "doc_recall": 1.0,
+      "doc_mrr": 1.0,
+      "doc_precision": 0.4,
+      "answer_coverage": 0.9412,
+      "context_tokens": 861
+    }
+  ]
+}

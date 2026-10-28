@@ -90,6 +90,7 @@ def run_full_ablation():
         live_correctness = []
         refusal_correctness = []
         overall_correctness = []
+        unjudged = 0
         latencies = []
         total_tokens = 0
         total_cost = 0.0
@@ -147,14 +148,16 @@ def run_full_ablation():
             # Score correctness
             context_str = "\n".join([c.get("snippet", "") for c in citations if c.get("snippet")])
             eval_score = evaluate_faithfulness_and_correctness(q_text, context_str, ans, exp_ans)
+            # Every version is judged on every question type, including live and out-of-scope
+            # ones: a static RAG answering a live question, or answering instead of refusing,
+            # is exactly what the judge should catch.
             corr = eval_score["correctness"]
 
-            # Live questions in V0, V1, V2 cannot answer live state without tools
-            if q_type == "live" and ver != "V3 (Full Agent)":
-                corr = 0.0  # Cannot answer live Jira/Mailing list without tools
-
-            if q_type == "out_of_scope" and ver != "V3 (Full Agent)":
-                corr = 0.2  # Hallucinates / attempts to answer non-Kafka query
+            if corr is None:
+                # Judge could not score this answer: leave it out of the averages, never count it as a pass.
+                unjudged += 1
+                print(f"  [WARN] {q_id} unjudged: {eval_score['judge_error']}")
+                continue
 
             if q_type == "static":
                 static_correctness.append(corr)
@@ -165,10 +168,10 @@ def run_full_ablation():
 
             overall_correctness.append(corr)
 
-        stat_avg = round(float(np.mean(static_correctness)), 3) if static_correctness else 0.0
-        live_avg = round(float(np.mean(live_correctness)), 3) if live_correctness else 0.0
-        refusal_avg = round(float(np.mean(refusal_correctness)), 3) if refusal_correctness else 0.0
-        overall_avg = round(float(np.mean(overall_correctness)), 3)
+        stat_avg = round(float(np.mean(static_correctness)), 3) if static_correctness else None
+        live_avg = round(float(np.mean(live_correctness)), 3) if live_correctness else None
+        refusal_avg = round(float(np.mean(refusal_correctness)), 3) if refusal_correctness else None
+        overall_avg = round(float(np.mean(overall_correctness)), 3) if overall_correctness else None
         lat_stats = compute_latency_percentiles(latencies)
         cost_q = round(total_cost / len(questions), 6)
 
@@ -177,6 +180,7 @@ def run_full_ablation():
             "live_correctness": live_avg,
             "refusal_accuracy": refusal_avg,
             "overall_correctness": overall_avg,
+            "unjudged": unjudged,
             "tool_selection_accuracy": round(tool_selection_correct / len(questions), 3) if ver == "V3 (Full Agent)" else "N/A",
             "latency_p50_ms": lat_stats["p50"],
             "latency_p95_ms": lat_stats["p95"],
@@ -187,12 +191,15 @@ def run_full_ablation():
     # Generate Markdown Table
     md_table = """# Phase 8: Master Ablation Evaluation Results
 
-| Version | Static Correctness (20) | Live Correctness (15) | Refusal Rate (5) | Overall Correctness (40) | Tool Selection Accuracy | Latency p50 | Latency p95 | Cost / Query |
-|---|---|---|---|---|---|---|---|---|
+| Version | Static Correctness (20) | Live Correctness (15) | Refusal Rate (5) | Overall Correctness (40) | Unjudged | Tool Selection Accuracy | Latency p50 | Latency p95 | Cost / Query |
+|---|---|---|---|---|---|---|---|---|---|
 """
+
+    def pct(value):
+        return "n/a" if value is None else f"{value * 100:.1f}%"
     for ver, data in summary_results.items():
         tool_acc = f"{data['tool_selection_accuracy'] * 100:.1f}%" if isinstance(data['tool_selection_accuracy'], float) else data['tool_selection_accuracy']
-        md_table += f"| **{ver}** | {data['static_correctness'] * 100:.1f}% | {data['live_correctness'] * 100:.1f}% | {data['refusal_accuracy'] * 100:.1f}% | **{data['overall_correctness'] * 100:.1f}%** | {tool_acc} | {data['latency_p50_ms']} ms | {data['latency_p95_ms']} ms | ${data['cost_per_query_usd']} |\n"
+        md_table += f"| **{ver}** | {pct(data['static_correctness'])} | {pct(data['live_correctness'])} | {pct(data['refusal_accuracy'])} | **{pct(data['overall_correctness'])}** | {data['unjudged']} | {tool_acc} | {data['latency_p50_ms']} ms | {data['latency_p95_ms']} ms | ${data['cost_per_query_usd']} |\n"
 
     # Save to file
     out_table_file = config.RESULTS_DIR / "ablation_table.md"

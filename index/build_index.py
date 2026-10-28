@@ -7,6 +7,7 @@ and indexes into Qdrant collection 'kafka_docs' with rich metadata.
 import os
 import sys
 import json
+import hashlib
 import re
 import uuid
 from pathlib import Path
@@ -115,7 +116,9 @@ def compute_embeddings(texts: List[str], model_type: str, model_obj: Any) -> Lis
         for t in texts:
             vec = [0.0] * config.EMBEDDING_DIMENSION
             for i, word in enumerate(t.split()[:50]):
-                idx = abs(hash(word)) % config.EMBEDDING_DIMENSION
+                # hashlib, not hash(): str hashes are salted per process, so index-time and
+                # query-time vectors would differ between runs.
+                idx = int.from_bytes(hashlib.md5(word.encode("utf-8")).digest()[:4], "little") % config.EMBEDDING_DIMENSION
                 vec[idx] += 1.0 / (i + 1)
             norm = sum(x * x for x in vec) ** 0.5 or 1.0
             embeddings.append([x / norm for x in vec])
@@ -182,8 +185,10 @@ def build_and_upload_index():
         print(f"\nConnecting to Qdrant at {config.QDRANT_URL}...")
         client = QdrantClient(url=config.QDRANT_URL, timeout=5.0)
 
-        # Recreate collection
-        client.recreate_collection(
+        # Recreate collection (recreate_collection() is deprecated in qdrant-client >= 1.10)
+        if client.collection_exists(config.QDRANT_COLLECTION):
+            client.delete_collection(config.QDRANT_COLLECTION)
+        client.create_collection(
             collection_name=config.QDRANT_COLLECTION,
             vectors_config=VectorParams(size=len(vectors[0]), distance=Distance.COSINE),
         )

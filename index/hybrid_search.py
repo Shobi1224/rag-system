@@ -40,13 +40,17 @@ def reciprocal_rank_fusion(
     scores: Dict[str, float] = {}
     doc_map: Dict[str, Dict[str, Any]] = {}
 
+    def key(doc: Dict[str, Any]) -> str:
+        # chunk_id identifies a chunk; a text prefix would merge chunks sharing a heading breadcrumb.
+        return str(doc.get("chunk_id") or doc.get("id") or doc.get("text", ""))
+
     for rank, doc in enumerate(vector_results):
-        doc_id = str(doc.get("id") or doc.get("text", "")[:30])
+        doc_id = key(doc)
         doc_map[doc_id] = doc
         scores[doc_id] = scores.get(doc_id, 0.0) + (1.0 / (k + rank + 1))
 
     for rank, doc in enumerate(bm25_results):
-        doc_id = str(doc.get("id") or doc.get("text", "")[:30])
+        doc_id = key(doc)
         doc_map[doc_id] = doc
         scores[doc_id] = scores.get(doc_id, 0.0) + (1.0 / (k + rank + 1))
 

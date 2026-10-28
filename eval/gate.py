@@ -21,34 +21,60 @@ BASELINES_DIR = BASE_DIR / "results" / "baselines"
 DEFAULT_BASELINE = BASE_DIR / "results" / "baseline.json"
 
 BASELINES_DIR.mkdir(parents=True, exist_ok=True)
+ABLATION_FILE = BASE_DIR / "results" / "ablation_summary.json"
+
+QUALITY_NAME_HINTS = ("correctness", "accuracy", "rate", "recall", "faithfulness")
+COST_NAME_HINTS = ("latency", "cost")
+
+
+class GateError(Exception):
+    """The gate cannot run (unknown run, missing data). Never treated as a pass."""
 
 
 def load_metrics_for_run(run_identifier: str) -> Dict[str, Any]:
-    """Loads metrics dictionary for a given candidate run or file path."""
+    """Loads metrics for a run: a JSON file path, or a version name in results/ablation_summary.json.
+
+    Names match case-insensitively, exactly or as an unambiguous prefix ("v3" -> "V3 (Full Agent)").
+    Anything else raises GateError instead of substituting metrics.
+    """
     cand_path = Path(run_identifier)
     if cand_path.exists():
         with open(cand_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    # Check in results/ablation_summary.json
-    ablation_file = BASE_DIR / "results" / "ablation_summary.json"
-    if ablation_file.exists():
-        with open(ablation_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            for k, v in data.items():
-                if run_identifier.lower() in k.lower():
-                    return v
+    if not ABLATION_FILE.exists():
+        raise GateError(f"'{run_identifier}' is not a file, and {ABLATION_FILE.relative_to(BASE_DIR)} does not exist.")
 
-    # Fallback to default v3 metrics
-    return {
-        "static_correctness": 1.0,
-        "live_correctness": 1.0,
-        "refusal_rate": 1.0,
-        "recall_at_5": 0.85,
-        "faithfulness": 1.0,
-        "latency_p95_ms": 2741.0,
-        "cost_per_query_usd": 0.000041
-    }
+    with open(ABLATION_FILE, "r", encoding="utf-8") as f:
+        runs = json.load(f)
+
+    wanted = run_identifier.strip().lower()
+    exact = [k for k in runs if k.lower() == wanted]
+    matches = exact or [k for k in runs if k.lower().startswith(wanted)]
+    if len(matches) == 1:
+        return runs[matches[0]]
+
+    available = ", ".join(f"'{k}'" for k in runs)
+    if not matches:
+        raise GateError(f"No run named '{run_identifier}'. Available: {available}")
+    raise GateError(f"'{run_identifier}' is ambiguous, it matches: {', '.join(matches)}")
+
+
+def metric_direction(metric_name: str, t_cfg: Dict[str, Any]) -> str:
+    """'higher' (quality), 'lower' (cost/latency) or 'none' (informational, not gated)."""
+    if "max_drop" in t_cfg:
+        return "higher"
+    if "max_increase_pct" in t_cfg:
+        return "lower"
+    if any(h in metric_name for h in QUALITY_NAME_HINTS):
+        return "higher"
+    if any(h in metric_name for h in COST_NAME_HINTS):
+        return "lower"
+    return "none"
+
+
+def is_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
 def promote_candidate(run_id: str):
@@ -93,15 +119,29 @@ def run_gate(baseline_path: Path, candidate_id: str) -> int:
     has_regression = False
 
     for metric_name, base_val in baseline.items():
-        cand_val = candidate.get(metric_name, base_val)
-        delta = cand_val - base_val
         t_cfg = thresholds.get(metric_name, {})
-        
+        direction = metric_direction(metric_name, t_cfg)
+        cand_val = candidate.get(metric_name)
+
+        if not is_number(base_val) and not is_number(cand_val):
+            # e.g. tool_selection_accuracy "N/A" on both sides: nothing to compare
+            print(f"{metric_name:<24} | {str(base_val):<10} | {str(cand_val):<10} | {'':<10} | {'not measured':<14} | {'SKIP':<8}")
+            continue
+
+        if not is_number(cand_val) or not is_number(base_val):
+            # A metric that disappeared, or was not measured (e.g. all answers unjudged),
+            # must not pass silently.
+            verdict = "FAIL" if direction != "none" else "SKIP"
+            has_regression = has_regression or verdict == "FAIL"
+            print(f"{metric_name:<24} | {str(base_val):<10} | {str(cand_val):<10} | {'':<10} | {'missing value':<14} | {verdict:<8}")
+            continue
+
+        delta = cand_val - base_val
         verdict = "PASS"
         threshold_str = "None"
 
         # Quality metrics (higher is better)
-        if "correctness" in metric_name or "rate" in metric_name or "recall" in metric_name or "faithfulness" in metric_name:
+        if direction == "higher":
             max_drop = t_cfg.get("max_drop", 0.05)
             threshold_str = f"Max drop -{max_drop}"
             if delta < -max_drop:
@@ -109,7 +149,7 @@ def run_gate(baseline_path: Path, candidate_id: str) -> int:
                 has_regression = True
 
         # Cost & Latency metrics (lower is better)
-        elif "latency" in metric_name or "cost" in metric_name:
+        elif direction == "lower":
             max_pct = t_cfg.get("max_increase_pct", 30.0)
             threshold_str = f"Max +{max_pct}%"
             if base_val > 0:
@@ -138,11 +178,14 @@ def main():
 
     args = parser.parse_args()
 
-    if args.promote:
-        promote_candidate(args.promote)
-        sys.exit(0)
-
-    exit_code = run_gate(Path(args.baseline), args.candidate)
+    try:
+        if args.promote:
+            promote_candidate(args.promote)
+            sys.exit(0)
+        exit_code = run_gate(Path(args.baseline), args.candidate)
+    except GateError as e:
+        print(f"\n[GATE ERROR] {e}\n", file=sys.stderr)
+        sys.exit(2)
     sys.exit(exit_code)
 
 
